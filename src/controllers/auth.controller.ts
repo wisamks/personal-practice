@@ -1,12 +1,14 @@
 import { CreateUserReqDto } from "@_/routes/reqDto/create-user.req.dto";
+import { GetUsersReqDto } from "@_/routes/reqDto/get-users.req.dto";
+import { UpdateUserReqDto } from "@_/routes/reqDto/update-user.req.dto";
 import { AuthService } from "@_/services/auth.service";
 import { NextFunction, Request, Response } from "express";
 
 export class AuthController {
     static async getUsers(req: Request, res: Response, next: NextFunction) {
-        const { page, perPage } = req.body;
+        const getUsersReqDto: GetUsersReqDto = req.body;
         try {
-            const foundUsers = await AuthService.getUsers();
+            const foundUsers = await AuthService.getUsers(getUsersReqDto);
             return res.status(200).json(foundUsers);
         } catch(err) {
             return next(err);
@@ -14,7 +16,7 @@ export class AuthController {
     }
 
     static async getUser(req: Request, res: Response, next: NextFunction) {
-        const { userId } = req.body;
+        const userId = +req.params.userId;
         try {
             const foundUser = await AuthService.getUser(userId);
             return res.status(200).json(foundUser);
@@ -33,9 +35,20 @@ export class AuthController {
         }
     }
 
-    static async deleteUser(req: Request, res: Response, next: NextFunction) {
+    static async updateUser(req: Request, res: Response, next: NextFunction) {
+        const updateUserReqDto: UpdateUserReqDto = req.body;
+        const userId = req.user?.userId;
         try {
-            const { userId } = req.body;
+            await AuthService.updateUser(updateUserReqDto, userId);
+            return res.status(204).end();
+        } catch(err) {
+            return next(err);
+        }
+    }
+
+    static async deleteUser(req: Request, res: Response, next: NextFunction) {
+        const userId = +req.params.userId;
+        try {
             await AuthService.deleteUser(userId);
             return res.status(204).end();
         } catch(err) {

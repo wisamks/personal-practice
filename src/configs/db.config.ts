@@ -1,4 +1,3 @@
-// mysql db 설정
 import mysql, { PoolOptions } from 'mysql2/promise';
 import dotenv from 'dotenv';
 import { InternalServerErrorException } from '@_/utils/customError.util';

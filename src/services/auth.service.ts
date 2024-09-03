@@ -4,10 +4,12 @@ import { NotFoundException } from "@_/utils/customError.util";
 import * as bcrypt from 'bcryptjs';
 import { plainToInstance } from "class-transformer";
 import { GetUserResDto } from "./resDto/get-user.res.dto";
+import { UpdateUserReqDto } from "@_/routes/reqDto/update-user.req.dto";
+import { GetUsersReqDto } from "@_/routes/reqDto/get-users.req.dto";
 
 export class AuthService {
-    static async getUsers(): Promise<GetUserResDto[]> {
-        const foundUsers = await UserModel.getUsers();
+    static async getUsers(getUsersReqDto: GetUsersReqDto): Promise<GetUserResDto[]> {
+        const foundUsers = await UserModel.getUsers(getUsersReqDto);
         return foundUsers.map(user => plainToInstance(GetUserResDto, user));
     }
 
@@ -23,6 +25,18 @@ export class AuthService {
         const hashedPassword = await bcrypt.hash(createUserReqDto.password, 10);
         createUserReqDto.password = hashedPassword;
         return await UserModel.createUser(createUserReqDto);
+    }
+
+    static async updateUser(updateUserReqDto: UpdateUserReqDto, userId: number): Promise<void> {
+        const foundUser = await UserModel.getUser(userId);
+        if (!foundUser) {
+            throw new NotFoundException('존재하지 않는 유저입니다.');
+        }
+        if (updateUserReqDto.password) {
+            const hashedPassword = await bcrypt.hash(updateUserReqDto.password, 10);
+            updateUserReqDto.password = hashedPassword;
+        }
+        return await UserModel.updateUser(updateUserReqDto, userId);
     }
 
     static async deleteUser(userId: number): Promise<void> {

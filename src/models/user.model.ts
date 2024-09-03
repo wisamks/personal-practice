@@ -2,9 +2,11 @@ import { Db } from "@_/configs/db.config";
 import { CreateUserReqDto } from "@_/routes/reqDto/create-user.req.dto";
 import { plainToInstance } from "class-transformer";
 import { User } from "./entities/user.entity";
+import { UpdateUserReqDto } from "@_/routes/reqDto/update-user.req.dto";
+import { GetUsersReqDto } from "@_/routes/reqDto/get-users.req.dto";
 
 export class UserModel extends Db {
-    static async getUsers(): Promise<User[]> {
+    static async getUsers({page, perPage}: GetUsersReqDto): Promise<User[]> {
         const sql = 
         `
         SELECT *
@@ -13,8 +15,6 @@ export class UserModel extends Db {
         ORDER BY created_at DESC
         LIMIT ? OFFSET ?
         `;
-        const page = 1;
-        const perPage = 10;
         const offset = perPage * (page-1)
         const values = [String(perPage), String(offset)];
 
@@ -48,7 +48,36 @@ export class UserModel extends Db {
         return results[0].insertId;
     }
 
-    static async updateUser() {}
+    static async updateUser(updateUserReqDto: UpdateUserReqDto, userId: number): Promise<void> {
+        if (!updateUserReqDto) {
+            return;
+        }
+        const { email, password, name } = updateUserReqDto;
+        const values = [];
+        const subSql = [];
+        if (email) {
+            values.push(email);
+            subSql.push('email = ? ');
+        }
+        if (password) {
+            values.push(password);
+            subSql.push('password = ? ');
+        }
+        if (name) {
+            values.push(name);
+            subSql.push('name = ? ');
+        }
+        const sql =
+        `
+        UPDATE user
+        SET ${subSql.join('AND ')}
+        WHERE deleted_at IS NULL
+            AND id = ?
+        `;
+        values.push(userId);
+        await this.query(sql, values);
+        return;
+    }
 
     static async deleteUser(userId: number): Promise<void> {
         const sql = 
