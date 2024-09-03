@@ -14,4 +14,3 @@
     - 페이지네이션은 offset 스타일로 구현한다.
     - dto는 class-validator와 class-transformer를 사용하여 구현한다.
     - typescript를 사용한다.
-    - jwt, 비밀번호를 사용하여 인증한다.

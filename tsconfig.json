@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2021",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@_/": ["./src/main.ts"],
+      "@_/*": ["./src/*"],
+
+      "@_configs/*": ["./src/configs/*"],
+      "@_controllers/*": ["./src/controllers/*"],
+      "@_customTypes/*": ["./src/customTypes/*"],
+      "@_middlewares/*": ["./src/middlewares/*"],
+      "@_models/*": ["./src/models/*"],
+      "@_routes/*": ["./src/routes/*"],
+      "@_services/*": ["./src/services/*"],
+      "@_utils/*": ["./src/utils/*"]
+    }
+  }
+}
