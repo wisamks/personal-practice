@@ -4,7 +4,6 @@ import { AuthController } from './auth.controller';
 import { UserRepository } from '../user/user.repository';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { jwtConfig } from '@_/config/secret.config';
 import { JwtStrategy } from './jwt.strategy';
 import { UserService } from '@_/user/user.service';
 import { UserModule } from '@_/user/user.module';
@@ -16,9 +15,9 @@ import { UserModule } from '@_/user/user.module';
       defaultStrategy: 'jwt',
     }),
     JwtModule.register({
-      secret: jwtConfig.accessSecret,
+      secret: process.env.JWT_ACCESS_TOKEN_SECRET,
       signOptions: {
-        expiresIn: jwtConfig.accessExpire
+        expiresIn: process.env.JWT_ACCESS_EXPIRE,
       }
     })
   ],
