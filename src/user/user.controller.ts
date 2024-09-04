@@ -1,11 +1,13 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserReqDto } from './dto/update-user.req.dto';
 import { CreateUserResDto } from './dto/create-user.res.dto';
 import { CreateUserReqDto } from './dto/create-user.req.dto';
 import { GetUserResDto } from './dto/get-user.res.dto';
+import { ReqUser } from './req-user.decorator';
+import { JwtAuthGuard } from '@_/auth/auth-jwt.guard';
 
-@Controller('user')
+@Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -31,19 +33,21 @@ export class UserController {
     return await this.userService.createUser(createUserReqDto);
   }
 
-  @Put('/:userId')
+  @Put()
   @HttpCode(204)
+  @UseGuards(JwtAuthGuard)
   async updateUser(
     @Body() updateUserReqDto: UpdateUserReqDto,
-    @Param('userId', ParseIntPipe) userId: number,
+    @ReqUser('userId', ParseIntPipe) userId: number,
   ): Promise<void> {
     return await this.userService.updateUser({ updateUserReqDto, userId });
   }
 
-  @Delete('/:userId')
+  @Delete()
   @HttpCode(204)
+  @UseGuards(JwtAuthGuard)
   async deleteUser(
-    @Param('userId', ParseIntPipe) userId: number,
+    @ReqUser('userId', ParseIntPipe) userId: number,
   ): Promise<void> {
     return await this.userService.deleteUser(userId);
   }

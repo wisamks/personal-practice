@@ -31,7 +31,7 @@ export class UserService {
     async createUser(createUserReqDto: CreateUserReqDto): Promise<CreateUserResDto> {
         const foundUser = await this.userRepository.getUserByEmail(createUserReqDto.email);
         if (foundUser) {
-            throw new ConflictException('이미 존재하는 유저입니다.');
+            throw new ConflictException('이미 사용 중인 이메일입니다.');
         }
         const hashedPassword = await bcrypt.hash(createUserReqDto.password, 10);
         createUserReqDto.password = hashedPassword;
@@ -49,6 +49,10 @@ export class UserService {
         const foundUser = await this.userRepository.getUserById(userId);
         if (!foundUser) {
             throw new NotFoundException('존재하지 않는 유저입니다.');
+        }
+        const foundEmail = await this.userRepository.getUserByEmail(updateUserReqDto.email);
+        if (foundEmail) {
+            throw new ConflictException('이미 사용 중인 이메일입니다.');
         }
         return await this.userRepository.updateUser({ updateUserReqDto, userId });
     }
