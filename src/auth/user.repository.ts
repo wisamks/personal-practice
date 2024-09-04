@@ -57,8 +57,13 @@ export class UserRepository extends Repository<User> {
         if (!foundUser) {
             throw new NotFoundException('존재하지 않는 유저입니다.');
         }
-        await this.update(where, updateUserReqDto);
-        return;
+        try {
+            await this.update(where, updateUserReqDto);
+            return;
+        } catch(err) {
+            this.logger.error(err);
+            throw new InternalServerErrorException(err.message);
+        }
     }
 
     async deleteUser(userId: number): Promise<void> {
@@ -69,7 +74,12 @@ export class UserRepository extends Repository<User> {
         if (!foundUser) {
             throw new NotFoundException('존재하지 않는 유저입니다.');
         }
-        await this.softDelete( where );
-        return;
+        try {
+            await this.softDelete( where );
+            return;
+        } catch(err) {
+            this.logger.error(err);
+            throw new InternalServerErrorException(err.message);
+        }
     }
 }
