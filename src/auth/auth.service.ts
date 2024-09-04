@@ -1,18 +1,17 @@
-import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { UserRepository } from './user.repository';
-import { CreateUserReqDto } from './dto/create-user.req.dto';
-import { CreateUserResDto } from './dto/create-user.res.dto';
-import { plainToInstance } from 'class-transformer';
-import { GetUserResDto } from './dto/get-user.res.dto';
-import { UpdateUserReqDto } from './dto/update-user.req.dto';
-import { SignInReqDto } from './dto/sign-in.req.dto';
+import { BadRequestException, Injectable, Logger } from "@nestjs/common";
+import { SignInReqDto } from "./dto/sign-in.req.dto";
+import { UserService } from "@_/user/user.service";
+import { UserRepository } from "@_/user/user.repository";
 import * as bcrypt from 'bcryptjs';
+import { SignUpReqDto } from "./dto/sign-up.req.dto";
+import { SignUpResDto } from "./dto/sign-up.res.dto";
 
 @Injectable()
 export class AuthService {
     private readonly logger = new Logger('AuthService');
 
     constructor(
+        private readonly userService: UserService,
         private readonly userRepository: UserRepository,
     ) {}
 
@@ -29,47 +28,7 @@ export class AuthService {
 
     }
 
-    async getUsers(): Promise<GetUserResDto[]> {
-        const foundUsers = await this.userRepository.getUsers();
-        return foundUsers.map(foundUser => plainToInstance(GetUserResDto, foundUser));
-    }
-
-    async getUser(userId: number): Promise<GetUserResDto> {
-        const foundUser = await this.userRepository.getUserById(userId);
-        if (!foundUser) {
-            throw new NotFoundException('존재하지 않는 유저입니다.');
-        }
-        return plainToInstance(GetUserResDto, foundUser);
-    }
-
-    async createUser(createUserReqDto: CreateUserReqDto): Promise<CreateUserResDto> {
-        const foundUser = await this.userRepository.getUserByEmail(createUserReqDto.email);
-        if (foundUser) {
-            throw new ConflictException('이미 존재하는 유저입니다.');
-        }
-        const createdUser = await this.userRepository.createUser(createUserReqDto);
-        return plainToInstance(CreateUserResDto, createdUser);
-    }
-
-    async updateUser({ 
-        updateUserReqDto, 
-        userId 
-    }: { 
-        updateUserReqDto: UpdateUserReqDto;
-        userId: number; 
-    }): Promise<void> {
-        const foundUser = await this.userRepository.getUserById(userId);
-        if (!foundUser) {
-            throw new NotFoundException('존재하지 않는 유저입니다.');
-        }
-        return await this.userRepository.updateUser({ updateUserReqDto, userId });
-    }
-
-    async deleteUser(userId: number): Promise<void> {
-        const foundUser = await this.userRepository.getUserById(userId);
-        if (!foundUser) {
-            throw new NotFoundException('존재하지 않는 유저입니다.')
-        }
-        return await this.userRepository.deleteUser(userId);
+    async signUp(signUpReqDto: SignUpReqDto): Promise<SignUpResDto> {
+        return await this.userService.createUser(signUpReqDto);
     }
 }
