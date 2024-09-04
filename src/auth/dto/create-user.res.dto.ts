@@ -1,24 +1,4 @@
-import { Exclude, Expose } from "class-transformer";
+import { GetUserResDto } from "./get-user.res.dto";
+import { PickType } from "@nestjs/mapped-types";
 
-export class CreateUserResDto {
-    @Expose({ name: 'id' })
-    readonly userId: number;
-
-    @Exclude()
-    readonly email: string;
-    
-    @Exclude()
-    readonly password: string;
-    
-    @Exclude()
-    readonly name: string;
-    
-    @Exclude()
-    readonly createdAt: Date;
-    
-    @Exclude()
-    readonly updatedAt: Date;
-    
-    @Exclude()
-    readonly deletedAt: Date;
-}
+export class CreateUserResDto extends PickType(GetUserResDto, ['userId']){}

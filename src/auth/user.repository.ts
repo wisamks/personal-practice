@@ -2,7 +2,6 @@ import { Injectable, InternalServerErrorException, Logger, NotFoundException } f
 import { DataSource, Repository } from "typeorm";
 import { User } from "./user.entity";
 import { CreateUserReqDto } from "./dto/create-user.req.dto";
-import { plainToInstance } from "class-transformer";
 import { UpdateUserReqDto } from "./dto/update-user.req.dto";
 
 @Injectable()
@@ -40,40 +39,37 @@ export class UserRepository extends Repository<User> {
         return foundUser;
     }
 
-    async createUser(createUserReqDto: CreateUserReqDto): Promise<User> {
-        const createdUser = this.create(createUserReqDto);
-        if (!createdUser) {
-            throw new InternalServerErrorException('유저 정보 생성에 실패했습니다.');
-        }
+    async createUser(createUserReqDto: CreateUserReqDto): Promise<Pick<User, 'id'>> {
         try {
-            const created = await this.save(createdUser);
-            return created;
-        } catch(err) {}
+            const created = await this.insert(createUserReqDto);
+            const createdUser = created.identifiers[0] as Pick<User, 'id'>;
+            return createdUser;
+        } catch(err) {
+            throw new InternalServerErrorException('유저 정보 저장에 실패했습니다.');
+        }
     }
 
     async updateUser(updateUserReqDto: UpdateUserReqDto, userId: number): Promise<void> {
-        const foundUser = await this.findOne({
-            where: {
-                id: userId,
-            }
-        });
+        const where = {
+            id: userId
+        };
+        const foundUser = await this.findOne({ where });
         if (!foundUser) {
             throw new NotFoundException('존재하지 않는 유저입니다.');
         }
-        await this.update({ id: userId }, updateUserReqDto);
+        await this.update(where, updateUserReqDto);
         return;
     }
 
     async deleteUser(userId: number): Promise<void> {
-        const foundUser = await this.findOne({
-            where: {
-                id: userId,
-            }
-        });
+        const where = {
+            id: userId
+        };
+        const foundUser = await this.findOne({ where });
         if (!foundUser) {
             throw new NotFoundException('존재하지 않는 유저입니다.');
         }
-        await this.softDelete({ id: userId });
+        await this.softDelete( where );
         return;
     }
 }
