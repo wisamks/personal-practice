@@ -37,7 +37,7 @@ export class AuthController {
     @Body() updateUserReqDto: UpdateUserReqDto,
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<void> {
-    return await this.authService.updateUser(updateUserReqDto, userId);
+    return await this.authService.updateUser({ updateUserReqDto, userId });
   }
 
   @Delete('/:userId')

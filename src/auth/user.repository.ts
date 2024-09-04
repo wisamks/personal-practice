@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { DataSource, Repository } from "typeorm";
 import { User } from "./user.entity";
 import { CreateUserReqDto } from "./dto/create-user.req.dto";
@@ -14,6 +14,17 @@ export class UserRepository extends Repository<User> {
         super(User, dataSource.createEntityManager())
     }
 
+    async getUserByEmail(email: string): Promise<User> {
+        try {
+            return await this.findOne({
+                where: { email }
+            });
+        } catch(err) {
+            this.logger.error(err);
+            throw new InternalServerErrorException(err.message);
+        }
+    }
+
     async getUsers(): Promise<User[]> {
         try {
             const foundUsers = await this.find({
@@ -27,15 +38,12 @@ export class UserRepository extends Repository<User> {
         }
     }
 
-    async getUser(userId: number): Promise<User> {
+    async getUserById(userId: number): Promise<User> {
         const foundUser = await this.findOne({
             where: {
                 id: userId,
             }
         });
-        if (!foundUser) {
-            throw new NotFoundException('존재하지 않는 유저입니다.');
-        }
         return foundUser;
     }
 
@@ -49,14 +57,16 @@ export class UserRepository extends Repository<User> {
         }
     }
 
-    async updateUser(updateUserReqDto: UpdateUserReqDto, userId: number): Promise<void> {
+    async updateUser({ 
+            updateUserReqDto, 
+            userId 
+        }: { 
+            updateUserReqDto: UpdateUserReqDto;
+            userId: number; 
+        }): Promise<void> {
         const where = {
-            id: userId
+            id: userId,
         };
-        const foundUser = await this.findOne({ where });
-        if (!foundUser) {
-            throw new NotFoundException('존재하지 않는 유저입니다.');
-        }
         try {
             await this.update(where, updateUserReqDto);
             return;
@@ -70,10 +80,6 @@ export class UserRepository extends Repository<User> {
         const where = {
             id: userId
         };
-        const foundUser = await this.findOne({ where });
-        if (!foundUser) {
-            throw new NotFoundException('존재하지 않는 유저입니다.');
-        }
         try {
             await this.softDelete( where );
             return;
