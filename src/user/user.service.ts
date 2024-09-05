@@ -51,7 +51,7 @@ export class UserService {
             throw new NotFoundException('존재하지 않는 유저입니다.');
         }
         const foundEmail = await this.userRepository.getUserByEmail(updateUserReqDto.email);
-        if (foundEmail) {
+        if (foundEmail && foundEmail.id !== userId) {
             throw new ConflictException('이미 사용 중인 이메일입니다.');
         }
         return await this.userRepository.updateUser({ updateUserReqDto, userId });

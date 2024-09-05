@@ -5,6 +5,9 @@ import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
+import { PostModule } from './post/post.module';
+import { APP_GUARD } from '@nestjs/core';
+import { ReqUserGuard } from './auth/optional-jwt.guard';
 
 @Module({
   imports: [
@@ -21,10 +24,19 @@ import { ConfigModule } from '@nestjs/config';
       database: process.env.MYSQL_NAME,
       entities: [__dirname + '/../**/*.entity.{js, ts}'],
       synchronize: true,
+      dateStrings: false,
+      timezone: 'Z',
     }),
     UserModule,
+    PostModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ReqUserGuard,
+    }
+  ],
 })
 export class AppModule {}
