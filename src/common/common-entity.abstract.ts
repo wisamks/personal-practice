@@ -1,5 +1,8 @@
+import { Global, Injectable } from "@nestjs/common";
 import { BaseEntity, CreateDateColumn, DeleteDateColumn, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
+@Injectable()
+@Global()
 export abstract class CommonEntity extends BaseEntity {
     @PrimaryGeneratedColumn({ unsigned: true })
     id: number;
