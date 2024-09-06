@@ -1,8 +1,7 @@
 import { PrismaService } from "@_/prisma/prisma.service";
 import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { GetPostsReqDto } from "./dto/get-posts.req.dto";
-import { Post } from "@prisma/client";
-import { CreatePostReqDto } from "./dto/create-post.req.dto";
+import { Post, PrismaClient } from "@prisma/client";
 import { CreatePostReqType } from "./constant/create-post.req.constant";
 import { UpdatePostReqType } from "./constant/update-post.req.constant";
 
@@ -54,9 +53,9 @@ export class PostRepository {
         }
     }
 
-    async createPost(data: CreatePostReqType): Promise<Pick<Post, 'id'>> {
+    async createPost(tx: any, data: CreatePostReqType): Promise<Pick<Post, 'id'>> {
         try {
-            const createdResult = await this.prismaService.post.create({ data });
+            const createdResult = await tx.post.create({ data });
             return { id: createdResult.id };
         } catch(err) {
             this.logger.error(err);
@@ -64,7 +63,7 @@ export class PostRepository {
         }
     }
 
-    async updatePost({ data, postId }: {
+    async updatePost(tx: any, { data, postId }: {
         data: UpdatePostReqType,
         postId: number
     }): Promise<void> {
@@ -73,7 +72,7 @@ export class PostRepository {
             deletedAt: null,
         };
         try {
-            await this.prismaService.post.update({
+            await tx.post.update({
                 data,
                 where,
             });
@@ -84,13 +83,13 @@ export class PostRepository {
         }
     }
 
-    async deletePost(postId: number): Promise<void> {
+    async deletePost(tx: any, postId: number): Promise<void> {
         const where = {
             id: postId,
             deletedAt: null,
         };
         try {
-            await this.prismaService.post.update({
+            await tx.post.update({
                 data: {
                     deletedAt: new Date(),
                 },

@@ -21,7 +21,7 @@ export class TagService {
         return foundTags;
     }
 
-    async createTags({ tags, postId }: {
+    async createTags(tx: any, { tags, postId }: {
         tags: string[];
         postId: number;
     }): Promise<void> {
@@ -29,7 +29,7 @@ export class TagService {
         const restTags = [];
 
         for (const tag of tags) {
-            const foundTag = await this.tagRepository.getTagByName(tag);
+            const foundTag = await this.tagRepository.getTagByName(tx, tag);
             if (foundTag) {
                 tagIds.push(foundTag.id);
             } else {
@@ -38,16 +38,16 @@ export class TagService {
         }
 
         for (const tag of restTags) {
-            const createdTag = await this.tagRepository.createTagByName(tag);
+            const createdTag = await this.tagRepository.createTagByName(tx, tag);
             tagIds.push(createdTag.id);
         }
 
         const relations = tagIds.map( tagId => ({ tagId, postId }));
-        await this.postTagRepository.createRelations(relations);
+        await this.postTagRepository.createRelations(tx, relations);
         return;
     }
 
-    async deleteTags(postId: number): Promise<void> {
-        return await this.postTagRepository.deleteRelationsByPostId(postId);
+    async deleteTags(tx: any, postId: number): Promise<void> {
+        return await this.postTagRepository.deleteRelationsByPostId(tx, postId);
     }
 }

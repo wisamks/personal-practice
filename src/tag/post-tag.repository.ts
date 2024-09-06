@@ -17,9 +17,9 @@ export class PostTagRepository {
         return foundRelations;
     }
 
-    async createRelations(data: PostTag[]): Promise<void> {
+    async createRelations(tx: any, data: PostTag[]): Promise<void> {
         try {
-            await this.prismaService.postTag.createMany({ data });
+            await tx.postTag.createMany({ data });
             return;
         } catch(err) {
             this.logger.error(err);
@@ -27,12 +27,12 @@ export class PostTagRepository {
         }
     }
 
-    async deleteRelationsByPostId(postId: number): Promise<void> {  
+    async deleteRelationsByPostId(tx: any, postId: number): Promise<void> {  
         const where = {
             postId
         };
         try {
-            await this.prismaService.postTag.deleteMany({ where });
+            await tx.postTag.deleteMany({ where });
             return;
         } catch(err) {
             this.logger.error(err);

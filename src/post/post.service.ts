@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PostRepository } from './post.repository';
 import { CreatePostReqDto } from './dto/create-post.req.dto';
 import { TagService } from '@_/tag/tag.service';
@@ -50,9 +50,9 @@ export class PostService {
         const { title, content, tags } = createPostReqDto;
 
         return await this.prismaService.$transaction(async tx => {
-            const createdPost = await this.postRepository.createPost({ title, content, authorId: userId });
+            const createdPost = await this.postRepository.createPost(tx, { title, content, authorId: userId });
             if (tags && createdPost) {
-                await this.tagService.createTags({ tags, postId: createdPost.id });
+                await this.tagService.createTags(tx, { tags, postId: createdPost.id });
             }
             return plainToInstance(CreatePostResDto, createdPost);
         });
@@ -74,11 +74,11 @@ export class PostService {
 
         return await this.prismaService.$transaction( async tx => { 
             await Promise.all([
-                this.postRepository.updatePost({ data: { title, content }, postId }),
-                this.tagService.deleteTags(postId),
+                this.postRepository.updatePost(tx, { data: { title, content }, postId }),
+                this.tagService.deleteTags(tx, postId),
             ]);
             if (tags) {
-                await this.tagService.createTags({ tags, postId });
+                await this.tagService.createTags(tx, { tags, postId });
             }
             return;
         });
@@ -99,8 +99,8 @@ export class PostService {
         
         return await this.prismaService.$transaction( async tx => {
             await Promise.all([
-                this.postRepository.deletePost(postId),
-                this.tagService.deleteTags(postId),
+                this.postRepository.deletePost(tx, postId),
+                this.tagService.deleteTags(tx, postId),
             ]);
             return;
         });

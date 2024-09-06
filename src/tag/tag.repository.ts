@@ -23,22 +23,22 @@ export class TagRepository {
         }
     }
 
-    async getTagByName(name: string): Promise<Tag> {
+    async getTagByName(tx: any, name: string): Promise<Tag> {
         const where = {
             name,
             deletedAt: null,
         };
         try {
-            return await this.prismaService.tag.findFirst({ where });
+            return await tx.tag.findFirst({ where });
         } catch(err) {
             this.logger.error(err);
             throw new InternalServerErrorException(err.message);
         }
     }
 
-    async createTagByName(name: string): Promise<Tag> {
+    async createTagByName(tx: any, name: string): Promise<Tag> {
         try {
-            return await this.prismaService.tag.create({ data: { name }});
+            return await tx.tag.create({ data: { name }});
         } catch(err) {
             this.logger.error(err);
             throw new InternalServerErrorException(err.message);
