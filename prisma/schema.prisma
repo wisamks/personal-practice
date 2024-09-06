@@ -13,3 +13,60 @@ datasource db {
   url      = env("MYSQL_URL")
   shadowDatabaseUrl = env("SHADOW_MYSQL_URL")
 }
+
+model User {
+  id  Int @default(autoincrement()) @id @db.UnsignedInt
+  createdAt DateTime  @default(now()) @map("created_at")  @db.Timestamp(3)
+  updatedAt DateTime  @updatedAt  @map("updated_at")      @db.Timestamp(3)
+  deletedAt DateTime? @map("deleted_at")                  @db.Timestamp(3)
+
+  email String        @db.VarChar(500)
+  password String     @db.VarChar(255)
+  name String         @db.VarChar(50)
+
+  posts Post[]
+
+  @@map("user")
+}
+
+model Post {
+  id  Int @default(autoincrement()) @id @db.UnsignedInt
+  createdAt DateTime  @default(now()) @map("created_at")  @db.Timestamp(3)
+  updatedAt DateTime  @updatedAt  @map("updated_at")      @db.Timestamp(3)
+  deletedAt DateTime? @map("deleted_at")                  @db.Timestamp(3)
+
+  title String    @db.VarChar(50)
+  content String  @db.Text
+
+  author  User  @relation(fields: [authorId], references: [id])
+  authorId  Int @map("author_id") @db.UnsignedInt
+
+  tags  PostTag[]
+
+  @@map("post")
+}
+
+model Tag {
+  id  Int @default(autoincrement()) @id @db.UnsignedInt
+  createdAt DateTime  @default(now()) @map("created_at")  @db.Timestamp(3)
+  updatedAt DateTime  @updatedAt  @map("updated_at")      @db.Timestamp(3)
+  deletedAt DateTime? @map("deleted_at")                  @db.Timestamp(3)
+
+  name      String    @db.VarChar(30)
+
+  posts PostTag[]
+
+  @@map("tag")
+}
+
+model PostTag {
+  post  Post  @relation(fields: [postId], references: [id])
+  postId  Int @map("post_id") @db.UnsignedInt
+
+  tag   Tag   @relation(fields: [tagId], references: [id])
+  tagId   Int @map("tag_id") @db.UnsignedInt
+
+  @@id([postId, tagId])
+
+  @@map("post_tag")
+}

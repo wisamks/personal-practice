@@ -5,10 +5,16 @@ import { PostRepository } from './post.repository';
 import { TagService } from '@_/tag/tag.service';
 import { TagRepository } from '@_/tag/tag.repository';
 import { TagModule } from '@_/tag/tag.module';
+import { PostTagRepository } from '@_/tag/post-tag.repository';
+import { PrismaModule } from '@_/prisma/prisma.module';
 
 @Module({
-  imports: [TagModule],
+  imports: [
+    TagModule,
+    PrismaModule,
+  ],
   controllers: [PostController],
-  providers: [PostService, PostRepository, TagService, TagRepository],
+  providers: [PostService, PostRepository, TagService, TagRepository, PostTagRepository],
+  exports: [PostService, PostRepository]
 })
 export class PostModule {}

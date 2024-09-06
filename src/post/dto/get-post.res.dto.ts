@@ -24,6 +24,5 @@ export class GetPostResDto {
     @Exclude()
     deletedAt: Date;
 
-    @Transform(({ value }) => value.map((tag: Tag) => plainToInstance(GetTagResDto, tag)))
-    tags: GetTagResDto;
+    tags: string[];
 }

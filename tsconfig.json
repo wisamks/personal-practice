@@ -23,7 +23,9 @@
       "@_auth/*": ["./src/auth/*"],
       "@_user/*": ["./src/user/*"],
       "@_post/*": ["./src/post/*"],
-      "@_common/*": ["./src/common/*"]
+      "@_common/*": ["./src/common/*"],
+      "@_tag/*": ["./src/tag/*"],
+      "@_prisma/*": ["./src/prisma/*"]
     }
   }
 }
