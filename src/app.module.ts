@@ -7,6 +7,8 @@ import { ConfigModule } from '@nestjs/config';
 import { PostModule } from './post/post.module';
 import { APP_GUARD } from '@nestjs/core';
 import { ReqUserGuard } from './auth/guards/optional-jwt.guard';
+import { CommentModule } from './comment/comment.module';
+import { PostLikeModule } from './post-like/post-like.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { ReqUserGuard } from './auth/guards/optional-jwt.guard';
     AuthModule,
     UserModule,
     PostModule,
+    CommentModule,
+    PostLikeModule,
   ],
   controllers: [AppController],
   providers: [
