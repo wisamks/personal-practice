@@ -13,6 +13,19 @@ export class CommentRepository {
         private readonly prismaService: PrismaService,
     ) {}
 
+    async getCommentsCountByPostId(postId: number): Promise<number> {
+        const where = {
+            postId,
+            deletedAt: null,
+        };
+        try {
+            return await this.prismaService.comment.count({ where });
+        } catch(err) {
+            this.logger.error(err);
+            throw new InternalServerErrorException(err.message);
+        }
+    }
+
     async getCommentsByPostId({ postId, take, cursor }: GetCommentsInputType): Promise<Comment[]> {
         const where = {
             postId,

@@ -49,10 +49,12 @@ export class PostService {
         postId: number,
         userId: number,
     }): Promise<GetPostResDto> {
+        // 기본 post 가져오고 없으면 에러
         const foundPost = await this.postRepository.getPost(postId);
         if (!foundPost) {
             throw new NotFoundException(POST_NOT_FOUND_ERROR_MESSAGE);
         }
+        // 세부 정보들을 가져오면서 조회수 올리기
         const [foundTags, foundComments] = await Promise.all([
             await this.tagService.getTagsByPostId(postId),
             await this.commentService.getCommentsByPostId({
@@ -61,12 +63,23 @@ export class PostService {
             }),
             await this.viewService.createView({ postId, userId })
         ]);
-        const viewsCount = await this.viewService.getViewCountByPostId(postId);
-        const counts = {
-            viewsCount,
+        // 카운트 정보 가져오기
+        const [viewsCount, commentsCount] = await Promise.all([
+            await this.viewService.getViewCountByPostId(postId),
+            await this.commentService.getCommentsCountByPostId(postId),
+        ]);
+        // 각 정보들 객체로 저장
+        const responseDto = {
+            ...foundPost,
+            tags: foundTags,
+            counts: {
+                viewsCount,
+                commentsCount,
+            },
         };
+
         return {
-            ...plainToInstance(GetPostResDto, { ...foundPost, tags: foundTags, counts }),
+            ...plainToInstance(GetPostResDto, responseDto),
             comments: foundComments
         };
     }

@@ -16,6 +16,10 @@ export class CommentService {
         private readonly commentRepository: CommentRepository,
     ) {}
 
+    async getCommentsCountByPostId(postId: number): Promise<number> {
+        return await this.commentRepository.getCommentsCountByPostId(postId);
+    }
+
     async getCommentsByPostId({ getCommentsReqDto, postId }: {
         getCommentsReqDto: GetCommentsReqDto;
         postId: number;
