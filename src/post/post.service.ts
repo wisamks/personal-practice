@@ -1,13 +1,14 @@
 import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PostRepository } from './post.repository';
-import { CreatePostReqDto } from './dto/create-post.req.dto';
+import { CreatePostReqDto } from './dto/request/create-post.req.dto';
 import { TagService } from '@_/tag/tag.service';
 import { plainToInstance } from 'class-transformer';
-import { CreatePostResDto } from './dto/create-post.res.dto';
-import { GetPostResDto } from './dto/get-post.res.dto';
-import { GetPostsReqDto } from './dto/get-posts.req.dto';
-import { UpdatePostReqDto } from './dto/update-post.req.dto';
+import { GetPostResDto } from './dto/response/get-post.res.dto';
+import { GetPostsReqDto } from './dto/request/get-posts.req.dto';
 import { PrismaService } from '@_/prisma/prisma.service';
+import { CreatePostResDto } from './dto/response/create-post.res.dto';
+import { UpdatePostReqDto } from './dto/request/update-post.req.dto';
+import { GetCursorReqDto } from './dto/request/get-cursor.req.dto';
 
 @Injectable()
 export class PostService {
@@ -18,6 +19,16 @@ export class PostService {
         private readonly tagService: TagService,
         private readonly prismaService: PrismaService,
     ) {}
+
+    async getPostsByCursor(getCursorReqDto: GetCursorReqDto): Promise<GetPostResDto[]> {
+        const foundPosts = await this.postRepository.getPostsByCursor(getCursorReqDto);
+        const result = [];
+        for (const foundPost of foundPosts) {
+            const foundTags = await this.tagService.getTagsByPostId(foundPost.id);
+            result.push(plainToInstance(GetPostResDto, { ...foundPost, tags: foundTags }))
+        }
+        return result;
+    }
 
     async getPosts(getPostsReqDto: GetPostsReqDto): Promise<GetPostResDto[]> {
         const foundPosts = await this.postRepository.getPosts(getPostsReqDto);

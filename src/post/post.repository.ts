@@ -1,9 +1,10 @@
 import { PrismaService } from "@_/prisma/prisma.service";
 import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
-import { GetPostsReqDto } from "./dto/get-posts.req.dto";
-import { Post, PrismaClient } from "@prisma/client";
+import { GetPostsReqDto } from "./dto/request/get-posts.req.dto";
+import { Post } from "@prisma/client";
 import { CreatePostReqType } from "./constant/create-post.req.constant";
 import { UpdatePostReqType } from "./constant/update-post.req.constant";
+import { GetCursorReqDto } from "./dto/request/get-cursor.req.dto";
 
 @Injectable()
 export class PostRepository {
@@ -12,6 +13,26 @@ export class PostRepository {
     constructor(
         private readonly prismaService: PrismaService,
     ) {}
+
+    async getPostsByCursor({ take, cursor }: GetCursorReqDto): Promise<Post[]> {
+        const where = {
+            deletedAt: null,
+        };
+        try {
+            return await this.prismaService.post.findMany({
+                where,
+                orderBy: {
+                    id: 'desc'
+                },
+                take,
+                skip: cursor ? 1 : 0,
+                ...(cursor && {cursor: { id: cursor }})
+            });
+        } catch(err) {
+            this.logger.error(err);
+            throw new InternalServerErrorException(err.message);
+        }
+    }
 
     async getPosts({ skip, take }: GetPostsReqDto): Promise<Post[]> {
         const where = {

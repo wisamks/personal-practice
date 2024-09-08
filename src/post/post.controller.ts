@@ -1,16 +1,25 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { PostService } from './post.service';
-import { CreatePostReqDto } from './dto/create-post.req.dto';
+import { CreatePostReqDto } from './dto/request/create-post.req.dto';
 import { ReqUser } from '@_/user/req-user.decorator';
 import { JwtAuthGuard } from '@_/auth/auth-jwt.guard';
-import { CreatePostResDto } from './dto/create-post.res.dto';
-import { GetPostResDto } from './dto/get-post.res.dto';
-import { GetPostsReqDto } from './dto/get-posts.req.dto';
-import { UpdatePostReqDto } from './dto/update-post.req.dto';
+import { GetPostResDto } from './dto/response/get-post.res.dto';
+import { GetPostsReqDto } from './dto/request/get-posts.req.dto';
+import { CreatePostResDto } from './dto/response/create-post.res.dto';
+import { UpdatePostReqDto } from './dto/request/update-post.req.dto';
+import { GetCursorReqDto } from './dto/request/get-cursor.req.dto';
 
 @Controller('posts')
 export class PostController {
   constructor(private readonly postService: PostService) {}
+
+  @Get('/cursor')
+  @HttpCode(200)
+  async getPostsByCursor(
+    @Query() getCursorReqDto: GetCursorReqDto,
+  ): Promise<GetPostResDto[]> {
+    return this.postService.getPostsByCursor(getCursorReqDto);
+  }
 
   @Get()
   @HttpCode(200)
