@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CommentRepository } from './comment.repository';
-import { COMMENT_SERVICE } from './constants/comment.constant';
+import { COMMENT_DELETE_TAKE, COMMENT_FORBIDDEN_ERROR_MESSAGE, COMMENT_NOT_FOUND_ERROR_MESSAGE, COMMENT_SERVICE } from './constants/comment.constant';
 import { CreateCommentReqDto } from './dto/request/create-comment.req.dto';
 import { plainToInstance } from 'class-transformer';
 import { CreateCommentResDto } from './dto/response/create-comment.res.dto';
@@ -37,5 +37,25 @@ export class CommentService {
             authorId: userId,
         });
         return plainToInstance(CreateCommentResDto, createdResult);
+    }
+
+    async deleteComment({ commentId, userId }: {
+        commentId: number,
+        userId: number,
+    }): Promise<GetCommentResDto> {
+        const foundComment = await this.commentRepository.getComment(commentId);
+        if (!foundComment) {
+            throw new NotFoundException(COMMENT_NOT_FOUND_ERROR_MESSAGE);
+        }
+        if (foundComment.authorId !== userId) {
+            throw new ForbiddenException(COMMENT_FORBIDDEN_ERROR_MESSAGE);
+        }
+        const nextComment = await this.commentRepository.getCommentsByPostId({
+            postId: foundComment.postId,
+            cursor: commentId,
+            take: COMMENT_DELETE_TAKE,
+        });
+        await this.commentRepository.deleteComment(commentId);
+        return plainToInstance(GetCommentResDto, nextComment[0]);
     }
 }

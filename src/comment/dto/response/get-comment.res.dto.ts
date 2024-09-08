@@ -11,6 +11,7 @@ export class GetCommentResDto {
     @Exclude()
     readonly authorId: number;
 
+    @Exclude()
     readonly postId: number;
 
     readonly content: string;

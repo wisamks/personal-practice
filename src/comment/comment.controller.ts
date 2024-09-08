@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CreateCommentReqDto } from './dto/request/create-comment.req.dto';
 import { JwtAuthGuard } from '@_/auth/guards/auth-jwt.guard';
@@ -12,7 +12,7 @@ export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
   @Get()
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   async getCommentsByCursor(
     @Query() getCommentsReqDto: GetCommentsReqDto,
     @Param('postId', ParseIntPipe) postId: number,
@@ -21,7 +21,7 @@ export class CommentController {
   }
 
   @Post()
-  @HttpCode(201)
+  @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
   async createComment(
     @Body() createCommentReqDto: CreateCommentReqDto,
@@ -29,5 +29,15 @@ export class CommentController {
     @ReqUser('userId') userId: number,
   ): Promise<CreateCommentResDto> {
     return await this.commentService.createComment({ createCommentReqDto, postId, userId });
+  }
+
+  @Delete('/:commentId')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  async deleteComment(
+    @Param('commentId', ParseIntPipe) commentId: number,
+    @ReqUser('userId') userId: number, 
+  ): Promise<GetCommentResDto> {
+    return await this.commentService.deleteComment({ commentId, userId });
   }
 }
