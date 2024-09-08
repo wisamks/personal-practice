@@ -13,6 +13,19 @@ export class PostLikeRepository {
         private readonly prismaService: PrismaService,
     ) {}
 
+    async getPostLikesCountByPostId(postId: number): Promise<number> {
+        const where = {
+            postId,
+            deletedAt: null,
+        };
+        try {
+            return await this.prismaService.postLike.count({ where });
+        } catch(err) {
+            this.logger.error(err);
+            throw new InternalServerErrorException(INTERNAL_SERVER_ERROR_MESSAGE);
+        }
+    }
+
     async getPostLikeByPostAndUser(data: TogglePostLikeReqType): Promise<PostLike> {
         const where = {
             ...data,

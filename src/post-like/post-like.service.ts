@@ -11,6 +11,10 @@ export class PostLikeService {
         private readonly postLikeRepository: PostLikeRepository,
     ) {}
 
+    async getPostLikesCountByPostId(postId: number): Promise<number> {
+        return await this.postLikeRepository.getPostLikesCountByPostId(postId);
+    }
+
     async togglePostLike(data: TogglePostLikeReqType): Promise<void> {
         const foundLike = await this.postLikeRepository.getPostLikeByPostAndUser(data);
         if (!foundLike) {

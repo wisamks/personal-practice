@@ -13,6 +13,9 @@ import { CommentRepository } from '@_/comment/comment.repository';
 import { ViewModule } from '@_/view/view.module';
 import { ViewService } from '@_/view/view.service';
 import { ViewRepository } from '@_/view/view.repository';
+import { PostLikeModule } from '@_/post-like/post-like.module';
+import { PostLikeService } from '@_/post-like/post-like.service';
+import { PostLikeRepository } from '@_/post-like/post-like.repository';
 
 @Module({
   imports: [
@@ -20,6 +23,7 @@ import { ViewRepository } from '@_/view/view.repository';
     PrismaModule,
     CommentModule,
     ViewModule,
+    PostLikeModule,
   ],
   controllers: [PostController],
   providers: [
@@ -32,6 +36,8 @@ import { ViewRepository } from '@_/view/view.repository';
     CommentRepository,
     ViewService,
     ViewRepository,
+    PostLikeService,
+    PostLikeRepository,
   ],
   exports: [PostService, PostRepository]
 })

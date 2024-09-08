@@ -12,6 +12,7 @@ import { GetCursorReqDto } from './dto/request/get-cursor.req.dto';
 import { POST_FORBIDDEN_ERROR_MESSAGE, POST_GET_COMMENT_REQ, POST_NOT_FOUND_ERROR_MESSAGE, POST_SERVICE } from './constants/post.constant';
 import { CommentService } from '@_/comment/comment.service';
 import { ViewService } from '@_/view/view.service';
+import { PostLikeService } from '@_/post-like/post-like.service';
 
 @Injectable()
 export class PostService {
@@ -23,6 +24,7 @@ export class PostService {
         private readonly prismaService: PrismaService,
         private readonly commentService: CommentService,
         private readonly viewService: ViewService,
+        private readonly postLikeService: PostLikeService,
     ) {}
 
     async getPostsByCursor(getCursorReqDto: GetCursorReqDto): Promise<GetPostResDto[]> {
@@ -64,9 +66,10 @@ export class PostService {
             await this.viewService.createView({ postId, userId })
         ]);
         // 카운트 정보 가져오기
-        const [viewsCount, commentsCount] = await Promise.all([
+        const [viewsCount, commentsCount, likesCount] = await Promise.all([
             await this.viewService.getViewCountByPostId(postId),
             await this.commentService.getCommentsCountByPostId(postId),
+            await this.postLikeService.getPostLikesCountByPostId(postId),
         ]);
         // 각 정보들 객체로 저장
         const responseDto = {
@@ -75,6 +78,7 @@ export class PostService {
             counts: {
                 viewsCount,
                 commentsCount,
+                likesCount
             },
         };
 
