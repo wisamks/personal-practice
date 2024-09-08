@@ -11,7 +11,10 @@ export class ViewService {
         private readonly viewRepository: ViewRepository,
     ) {}
 
-
+    async getViewCountByPostId(postId: number): Promise<number> {
+        return await this.viewRepository.getViewCountByPostId(postId);
+    }
+ 
     async createView(data: CreateViewInputType): Promise<void> {
         await this.viewRepository.createView(data);
         return;

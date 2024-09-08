@@ -11,6 +11,20 @@ export class ViewRepository {
         private readonly prismaService: PrismaService,
     ) {}
 
+    async getViewCountByPostId(postId: number): Promise<number> {
+        const where = {
+            postId,
+            deletedAt: null,
+        };
+        try {
+            const viewCount = await this.prismaService.view.count({ where });
+            return viewCount
+        } catch(err) {
+            this.logger.error(err);
+            throw new InternalServerErrorException(err.message);
+        }
+    }
+
     async createView(data: CreateViewInputType): Promise<void> {
         try {
             await this.prismaService.view.create({ data });

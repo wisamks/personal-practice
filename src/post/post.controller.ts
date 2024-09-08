@@ -31,6 +31,7 @@ export class PostController {
 
   @Get('/:postId')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
   async getPost(
     @Param('postId', ParseIntPipe) postId: number,
     @ReqUser('userId') userId: number | null,

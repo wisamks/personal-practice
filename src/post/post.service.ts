@@ -11,6 +11,7 @@ import { UpdatePostReqDto } from './dto/request/update-post.req.dto';
 import { GetCursorReqDto } from './dto/request/get-cursor.req.dto';
 import { POST_FORBIDDEN_ERROR_MESSAGE, POST_GET_COMMENT_REQ, POST_NOT_FOUND_ERROR_MESSAGE, POST_SERVICE } from './constants/post.constant';
 import { CommentService } from '@_/comment/comment.service';
+import { ViewService } from '@_/view/view.service';
 
 @Injectable()
 export class PostService {
@@ -21,6 +22,7 @@ export class PostService {
         private readonly tagService: TagService,
         private readonly prismaService: PrismaService,
         private readonly commentService: CommentService,
+        private readonly viewService: ViewService,
     ) {}
 
     async getPostsByCursor(getCursorReqDto: GetCursorReqDto): Promise<GetPostResDto[]> {
@@ -47,19 +49,24 @@ export class PostService {
         postId: number,
         userId: number,
     }): Promise<GetPostResDto> {
-        const [foundPost, foundTags, foundComments] = await Promise.all([
-            await this.postRepository.getPost(postId),
+        const foundPost = await this.postRepository.getPost(postId);
+        if (!foundPost) {
+            throw new NotFoundException(POST_NOT_FOUND_ERROR_MESSAGE);
+        }
+        const [foundTags, foundComments] = await Promise.all([
             await this.tagService.getTagsByPostId(postId),
             await this.commentService.getCommentsByPostId({
                 getCommentsReqDto: POST_GET_COMMENT_REQ,
                 postId,
             }),
+            await this.viewService.createView({ postId, userId })
         ]);
-        if (!foundPost) {
-            throw new NotFoundException(POST_NOT_FOUND_ERROR_MESSAGE);
-        }
+        const viewsCount = await this.viewService.getViewCountByPostId(postId);
+        const counts = {
+            viewsCount,
+        };
         return {
-            ...plainToInstance(GetPostResDto, { ...foundPost, tags: foundTags }),
+            ...plainToInstance(GetPostResDto, { ...foundPost, tags: foundTags, counts }),
             comments: foundComments
         };
     }

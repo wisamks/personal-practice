@@ -1,5 +1,6 @@
 import { GetCommentResDto } from "@_/comment/dto/response/get-comment.res.dto";
 import { GetCommentResType } from "@_/comment/types/get-comment.res";
+import { GetCountsResType } from "@_/post/types/get-counts.res";
 import { GetUserResDto } from "@_/user/dto/response/get-user.res.dto";
 import { Exclude, Expose, plainToInstance, Transform } from "class-transformer";
 
@@ -28,4 +29,6 @@ export class GetPostResDto {
 
     @Transform(({ value }) => plainToInstance(GetCommentResDto, value))
     comments: GetCommentResDto[];
+
+    counts: GetCountsResType;
 }
