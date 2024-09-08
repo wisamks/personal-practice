@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, Logger, Post, Res, UseGuards } from "@nestjs/common";
+import { Body, Controller, HttpCode, HttpStatus, Logger, Post, Res, UseGuards } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { SignUpReqDto } from "./dto/request/sign-up.req.dto";
 import { SignUpResDto } from "./dto/response/sign-up.res.dto";
@@ -14,7 +14,7 @@ export class AuthController {
     constructor(private readonly authService: AuthService) {}
 
     @Post('/sign-in')
-    @HttpCode(204)
+    @HttpCode(HttpStatus.NO_CONTENT)
     async signIn(
         @Body() signInReqDto: SignInReqDto,
         @Res() res: Response,
@@ -28,7 +28,7 @@ export class AuthController {
     }
 
     @Post('/sign-out')
-    @HttpCode(204)
+    @HttpCode(HttpStatus.NO_CONTENT)
     @UseGuards(JwtAuthGuard)
     async signOut(
         @Res() res: Response,
@@ -38,7 +38,7 @@ export class AuthController {
     }
 
     @Post('/sign-up')
-    @HttpCode(201)
+    @HttpCode(HttpStatus.CREATED)
     async signUp(
         @Body() signUpReqDto: SignUpReqDto,
     ): Promise<SignUpResDto> {

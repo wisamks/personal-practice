@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserReqDto } from './dto/request/update-user.req.dto';
 import { CreateUserResDto } from './dto/response/create-user.res.dto';
@@ -12,13 +12,13 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   async getUsers(): Promise<GetUserResDto[]> {
     return await this.userService.getUsers();
   }
 
   @Get('/:userId')
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   async getUser(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<GetUserResDto> {
@@ -26,7 +26,7 @@ export class UserController {
   }
 
   @Post('/sign-up')
-  @HttpCode(201)
+  @HttpCode(HttpStatus.CREATED)
   async createUser(
     @Body() createUserReqDto: CreateUserReqDto,
   ): Promise<CreateUserResDto> {
@@ -34,7 +34,7 @@ export class UserController {
   }
 
   @Put()
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
   async updateUser(
     @Body() updateUserReqDto: UpdateUserReqDto,
@@ -44,7 +44,7 @@ export class UserController {
   }
 
   @Delete()
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
   async deleteUser(
     @ReqUser('userId', ParseIntPipe) userId: number,

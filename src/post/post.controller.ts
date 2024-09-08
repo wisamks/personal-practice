@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostReqDto } from './dto/request/create-post.req.dto';
 import { ReqUser } from '@_/user/decorators/req-user.decorator';
@@ -14,7 +14,7 @@ export class PostController {
   constructor(private readonly postService: PostService) {}
 
   @Get('/cursor')
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   async getPostsByCursor(
     @Query() getCursorReqDto: GetCursorReqDto,
   ): Promise<GetPostResDto[]> {
@@ -22,7 +22,7 @@ export class PostController {
   }
 
   @Get()
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   async getPosts(
     @Query() getPostsReqDto: GetPostsReqDto,
   ): Promise<GetPostResDto[]> {
@@ -30,7 +30,7 @@ export class PostController {
   }
 
   @Get('/:postId')
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   async getPost(
     @Param('postId', ParseIntPipe) postId: number,
     @ReqUser('userId') userId: number | null,
@@ -40,7 +40,7 @@ export class PostController {
   }
 
   @Post()
-  @HttpCode(201)
+  @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
   async createPost(
     @Body() createPostReqDto: CreatePostReqDto,
@@ -50,7 +50,7 @@ export class PostController {
   }
 
   @Put('/:postId')
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
   async updatePost(
     @Body() updatePostReqDto: UpdatePostReqDto,
@@ -61,7 +61,7 @@ export class PostController {
   }
 
   @Delete('/:postId')
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
   async deletePost(
     @Param('postId', ParseIntPipe) postId: number,
