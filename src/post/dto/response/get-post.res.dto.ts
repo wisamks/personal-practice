@@ -1,3 +1,5 @@
+import { GetCommentResDto } from "@_/comment/dto/response/get-comment.res.dto";
+import { GetCommentResType } from "@_/comment/types/get-comment.res";
 import { GetUserResDto } from "@_/user/dto/response/get-user.res.dto";
 import { Exclude, Expose, plainToInstance, Transform } from "class-transformer";
 
@@ -23,4 +25,7 @@ export class GetPostResDto {
     deletedAt: Date;
 
     tags: string[];
+
+    @Transform(({ value }) => plainToInstance(GetCommentResDto, value))
+    comments: GetCommentResDto[];
 }

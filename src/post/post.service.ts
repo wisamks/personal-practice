@@ -9,7 +9,8 @@ import { PrismaService } from '@_/prisma/prisma.service';
 import { CreatePostResDto } from './dto/response/create-post.res.dto';
 import { UpdatePostReqDto } from './dto/request/update-post.req.dto';
 import { GetCursorReqDto } from './dto/request/get-cursor.req.dto';
-import { POST_FORBIDDEN_ERROR_MESSAGE, POST_NOT_FOUND_ERROR_MESSAGE, POST_SERVICE } from './constants/post.constant';
+import { POST_FORBIDDEN_ERROR_MESSAGE, POST_GET_COMMENT_REQ, POST_NOT_FOUND_ERROR_MESSAGE, POST_SERVICE } from './constants/post.constant';
+import { CommentService } from '@_/comment/comment.service';
 
 @Injectable()
 export class PostService {
@@ -19,6 +20,7 @@ export class PostService {
         private readonly postRepository: PostRepository,
         private readonly tagService: TagService,
         private readonly prismaService: PrismaService,
+        private readonly commentService: CommentService,
     ) {}
 
     async getPostsByCursor(getCursorReqDto: GetCursorReqDto): Promise<GetPostResDto[]> {
@@ -45,14 +47,21 @@ export class PostService {
         postId: number,
         userId: number,
     }): Promise<GetPostResDto> {
-        const [foundPost, foundTags] = await Promise.all([
+        const [foundPost, foundTags, foundComments] = await Promise.all([
             await this.postRepository.getPost(postId),
             await this.tagService.getTagsByPostId(postId),
+            await this.commentService.getCommentsByPostId({
+                getCommentsReqDto: POST_GET_COMMENT_REQ,
+                postId,
+            }),
         ]);
         if (!foundPost) {
             throw new NotFoundException(POST_NOT_FOUND_ERROR_MESSAGE);
         }
-        return plainToInstance(GetPostResDto, { ...foundPost, tags: foundTags });
+        return {
+            ...plainToInstance(GetPostResDto, { ...foundPost, tags: foundTags }),
+            comments: foundComments
+        };
     }
 
     async createPost({createPostReqDto, userId}: {

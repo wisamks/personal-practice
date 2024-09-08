@@ -11,8 +11,10 @@ export class GetUserResDto {
     
     readonly name: string;
     
+    @Exclude()
     readonly createdAt: Date;
     
+    @Exclude()
     readonly updatedAt: Date;
     
     @Exclude()

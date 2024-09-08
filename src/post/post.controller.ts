@@ -35,8 +35,7 @@ export class PostController {
     @Param('postId', ParseIntPipe) postId: number,
     @ReqUser('userId') userId: number | null,
   ): Promise<GetPostResDto> {
-    const foundPost = await this.postService.getPost({ postId, userId });
-    return foundPost;
+    return await this.postService.getPost({ postId, userId });
   }
 
   @Post()
