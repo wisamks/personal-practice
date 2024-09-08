@@ -6,6 +6,7 @@ import { plainToInstance } from 'class-transformer';
 import { CreateCommentResDto } from './dto/response/create-comment.res.dto';
 import { GetCommentsReqDto } from './dto/request/get-comments.req.dto';
 import { GetCommentResDto } from './dto/response/get-comment.res.dto';
+import { UpdateCommentReqDto } from './dto/request/update-comment.req.dto';
 
 @Injectable()
 export class CommentService {
@@ -37,6 +38,24 @@ export class CommentService {
             authorId: userId,
         });
         return plainToInstance(CreateCommentResDto, createdResult);
+    }
+
+    async updateComment({ updateCommentReqDto, userId, commentId }: {
+        updateCommentReqDto: UpdateCommentReqDto;
+        userId: number;
+        commentId: number;
+    }): Promise<void> {
+        const foundComment = await this.commentRepository.getComment(commentId);
+        if (!foundComment) {
+            throw new NotFoundException(COMMENT_NOT_FOUND_ERROR_MESSAGE);
+        }
+        if (foundComment.authorId !== userId) {
+            throw new ForbiddenException(COMMENT_FORBIDDEN_ERROR_MESSAGE);
+        }
+        return await this.commentRepository.updateComment({
+            data: updateCommentReqDto,
+            commentId,
+        });
     }
 
     async deleteComment({ commentId, userId }: {

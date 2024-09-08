@@ -1,7 +1,7 @@
 import { PrismaService } from "@_/prisma/prisma.service";
 import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { COMMENT_REPOSITORY } from "./constants/comment.constant";
-import { Comment } from "@prisma/client";
+import { Comment, Prisma } from "@prisma/client";
 import { CreateCommentInputType } from "./types/create-comment.input";
 import { GetCommentsInputType } from "./types/get-comments.input";
 
@@ -58,6 +58,26 @@ export class CommentRepository {
                 data
             });
             return { id: createdComment.id };
+        } catch(err) {
+            this.logger.error(err);
+            throw new InternalServerErrorException(err.message);
+        }
+    }
+
+    async updateComment({data, commentId}: {
+        data: Prisma.CommentUpdateInput;
+        commentId: number;
+    }): Promise<void> {
+        const where = {
+            id: commentId,
+            deletedAt: null,
+        };
+        try {
+            await this.prismaService.comment.update({
+                data,
+                where,
+            });
+            return;
         } catch(err) {
             this.logger.error(err);
             throw new InternalServerErrorException(err.message);
