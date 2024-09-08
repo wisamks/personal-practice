@@ -1,10 +1,11 @@
 import { PrismaService } from "@_/prisma/prisma.service";
 import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { Prisma, User } from "@prisma/client";
+import { USER_REPOSITORY } from "./constants/user.constant";
 
 @Injectable()
 export class UserRepository {
-    private readonly logger = new Logger('UserRepository');
+    private readonly logger = new Logger(USER_REPOSITORY);
     
     constructor(
         private readonly prismaService: PrismaService,

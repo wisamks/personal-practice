@@ -1,15 +1,16 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
-import { SignInReqDto } from "./dto/sign-in.req.dto";
 import { UserService } from "@_/user/user.service";
 import { UserRepository } from "@_/user/user.repository";
 import * as bcrypt from 'bcryptjs';
-import { SignUpReqDto } from "./dto/sign-up.req.dto";
-import { SignUpResDto } from "./dto/sign-up.res.dto";
+import { SignUpReqDto } from "./dto/request/sign-up.req.dto";
+import { SignUpResDto } from "./dto/response/sign-up.res.dto";
 import { JwtService } from "@nestjs/jwt";
+import { SignInReqDto } from "./dto/request/sign-in.req.dto";
+import { AUTH_SERVICE, SIGN_IN_ERROR_MESSAGE } from "./constants/auth.constants";
 
 @Injectable()
 export class AuthService {
-    private readonly logger = new Logger('AuthService');
+    private readonly logger = new Logger(AUTH_SERVICE);
 
     constructor(
         private readonly userService: UserService,
@@ -20,11 +21,11 @@ export class AuthService {
     async signIn(signInReqDto: SignInReqDto): Promise<{ accessToken: string }> {
         const foundUser = await this.userRepository.getUserByEmail(signInReqDto.email);
         if (!foundUser) {
-            throw new BadRequestException('이메일 또는 비밀번호가 일치하지 않습니다.');
+            throw new BadRequestException(SIGN_IN_ERROR_MESSAGE);
         }
         const checkPassword = await bcrypt.compare(signInReqDto.password, foundUser.password);
         if (!checkPassword) {
-            throw new BadRequestException('이메일 또는 비밀번호가 일치하지 않습니다.');
+            throw new BadRequestException(SIGN_IN_ERROR_MESSAGE);
         }
         const payload = { userId: foundUser.id };
         try {

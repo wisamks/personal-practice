@@ -2,13 +2,14 @@ import { PrismaService } from "@_/prisma/prisma.service";
 import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { GetPostsReqDto } from "./dto/request/get-posts.req.dto";
 import { Post } from "@prisma/client";
-import { CreatePostReqType } from "./constant/create-post.req.constant";
-import { UpdatePostReqType } from "./constant/update-post.req.constant";
+import { CreatePostReqType } from "./type/create-post.req";
+import { UpdatePostReqType } from "./type/update-post.req";
 import { GetCursorReqDto } from "./dto/request/get-cursor.req.dto";
+import { POST_REPOSITORY } from "./constants/post.constant";
 
 @Injectable()
 export class PostRepository {
-    private readonly logger = new Logger('PostRepository');
+    private readonly logger = new Logger(POST_REPOSITORY);
 
     constructor(
         private readonly prismaService: PrismaService,

@@ -1,10 +1,11 @@
 import { PrismaService } from "@_/prisma/prisma.service";
 import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { Tag } from "@prisma/client";
+import { TAG_REPOSITORY } from "./constants/tag.constant";
 
 @Injectable()
 export class TagRepository {
-    private readonly logger = new Logger('TagRepository');
+    private readonly logger = new Logger(TAG_REPOSITORY);
 
     constructor(
         private readonly prismaService: PrismaService,

@@ -6,7 +6,7 @@ import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import { PostModule } from './post/post.module';
 import { APP_GUARD } from '@nestjs/core';
-import { ReqUserGuard } from './auth/optional-jwt.guard';
+import { ReqUserGuard } from './auth/guards/optional-jwt.guard';
 
 @Module({
   imports: [

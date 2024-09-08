@@ -1,10 +1,11 @@
 import { Body, Controller, HttpCode, Logger, Post, Res, UseGuards } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { SignUpReqDto } from "./dto/sign-up.req.dto";
-import { SignUpResDto } from "./dto/sign-up.res.dto";
-import { SignInReqDto } from "./dto/sign-in.req.dto";
+import { SignUpReqDto } from "./dto/request/sign-up.req.dto";
+import { SignUpResDto } from "./dto/response/sign-up.res.dto";
+import { SignInReqDto } from "./dto/request/sign-in.req.dto";
 import { Response } from "express";
-import { JwtAuthGuard } from "./auth-jwt.guard";
+import { JwtAuthGuard } from "./guards/auth-jwt.guard";
+import { COOKIE_ACCESS_TOKEN_NAME } from "./constants/auth.constants";
 
 @Controller('auth')
 export class AuthController {
@@ -19,7 +20,7 @@ export class AuthController {
         @Res() res: Response,
     ): Promise<Response> {
         const { accessToken } = await this.authService.signIn(signInReqDto);
-        res.cookie('accessToken', accessToken, {
+        res.cookie(COOKIE_ACCESS_TOKEN_NAME, accessToken, {
             httpOnly: true,
             maxAge: 3600000,
         });
@@ -32,7 +33,7 @@ export class AuthController {
     async signOut(
         @Res() res: Response,
     ): Promise<Response> {
-        res.clearCookie('accessToken');
+        res.clearCookie(COOKIE_ACCESS_TOKEN_NAME);
         return res.end();
     }
 

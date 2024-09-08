@@ -1,15 +1,16 @@
 import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
-import { GetUserResDto } from './dto/get-user.res.dto';
+import { GetUserResDto } from './dto/response/get-user.res.dto';
 import { plainToInstance } from 'class-transformer';
-import { CreateUserReqDto } from './dto/create-user.req.dto';
-import { CreateUserResDto } from './dto/create-user.res.dto';
-import { UpdateUserReqDto } from './dto/update-user.req.dto';
+import { CreateUserReqDto } from './dto/request/create-user.req.dto';
+import { CreateUserResDto } from './dto/response/create-user.res.dto';
+import { UpdateUserReqDto } from './dto/request/update-user.req.dto';
 import { UserRepository } from './user.repository';
+import { USER_CONFLICT_ERROR_MESSAGE, USER_NOT_FOUND_ERROR_MESSAGE, USER_SERVICE } from './constants/user.constant';
 
 @Injectable()
 export class UserService {
-    private readonly logger = new Logger('UserService');
+    private readonly logger = new Logger(USER_SERVICE);
 
     constructor(
         private readonly userRepository: UserRepository,
@@ -23,7 +24,7 @@ export class UserService {
     async getUser(userId: number): Promise<GetUserResDto> {
         const foundUser = await this.userRepository.getUserById(userId);
         if (!foundUser) {
-            throw new NotFoundException('존재하지 않는 유저입니다.');
+            throw new NotFoundException(USER_NOT_FOUND_ERROR_MESSAGE);
         }
         return plainToInstance(GetUserResDto, foundUser);
     }
@@ -31,7 +32,7 @@ export class UserService {
     async createUser(createUserReqDto: CreateUserReqDto): Promise<CreateUserResDto> {
         const foundUser = await this.userRepository.getUserByEmail(createUserReqDto.email);
         if (foundUser) {
-            throw new ConflictException('이미 사용 중인 이메일입니다.');
+            throw new ConflictException(USER_CONFLICT_ERROR_MESSAGE);
         }
         const hashedPassword = await bcrypt.hash(createUserReqDto.password, 10);
         createUserReqDto.password = hashedPassword;
@@ -48,11 +49,11 @@ export class UserService {
     }): Promise<void> {
         const foundUser = await this.userRepository.getUserById(userId);
         if (!foundUser) {
-            throw new NotFoundException('존재하지 않는 유저입니다.');
+            throw new NotFoundException(USER_NOT_FOUND_ERROR_MESSAGE);
         }
         const foundEmail = await this.userRepository.getUserByEmail(updateUserReqDto.email);
         if (foundEmail && foundEmail.id !== userId) {
-            throw new ConflictException('이미 사용 중인 이메일입니다.');
+            throw new ConflictException(USER_CONFLICT_ERROR_MESSAGE);
         }
         return await this.userRepository.updateUser({ updateUserReqDto, userId });
     }
@@ -60,7 +61,7 @@ export class UserService {
     async deleteUser(userId: number): Promise<void> {
         const foundUser = await this.userRepository.getUserById(userId);
         if (!foundUser) {
-            throw new NotFoundException('존재하지 않는 유저입니다.')
+            throw new NotFoundException(USER_NOT_FOUND_ERROR_MESSAGE)
         }
         return await this.userRepository.deleteUser(userId);
     }

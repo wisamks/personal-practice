@@ -1,6 +1,4 @@
-import { GetTagResDto } from "@_/tag/dto/get-tag.res.dto";
-import { Tag } from "@_/tag/tag.entity";
-import { GetUserResDto } from "@_/user/dto/get-user.res.dto";
+import { GetUserResDto } from "@_/user/dto/response/get-user.res.dto";
 import { Exclude, Expose, plainToInstance, Transform } from "class-transformer";
 
 export class GetPostResDto {

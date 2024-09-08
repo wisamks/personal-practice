@@ -1,9 +1,10 @@
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { PrismaClient } from "@prisma/client";
+import { PRISMA_INIT_MESSAGE, PRISMA_SERVICE } from "./constants/prisma.constant";
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
-    private readonly logger = new Logger('PrismaService');
+    private readonly logger = new Logger(PRISMA_SERVICE);
 
     constructor() {
         super({
@@ -13,7 +14,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 
     onModuleInit() {
         this.$connect()
-            .then(() => this.logger.log(`프리즈마 연결에 성공했습니다.`))
+            .then(() => this.logger.log(PRISMA_INIT_MESSAGE))
             .catch(err => this.logger.error(err));
     }
 }

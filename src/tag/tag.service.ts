@@ -1,10 +1,11 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { TagRepository } from "./tag.repository";
 import { PostTagRepository } from "./post-tag.repository";
+import { TAG_SERVICE } from "./constants/tag.constant";
 
 @Injectable()
 export class TagService {
-    private readonly logger = new Logger('TagService');
+    private readonly logger = new Logger(TAG_SERVICE);
 
     constructor(
         private readonly tagRepository: TagRepository,

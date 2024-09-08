@@ -9,10 +9,11 @@ import { PrismaService } from '@_/prisma/prisma.service';
 import { CreatePostResDto } from './dto/response/create-post.res.dto';
 import { UpdatePostReqDto } from './dto/request/update-post.req.dto';
 import { GetCursorReqDto } from './dto/request/get-cursor.req.dto';
+import { POST_FORBIDDEN_ERROR_MESSAGE, POST_NOT_FOUND_ERROR_MESSAGE, POST_SERVICE } from './constants/post.constant';
 
 @Injectable()
 export class PostService {
-    private readonly logger = new Logger('PostService');
+    private readonly logger = new Logger(POST_SERVICE);
 
     constructor(
         private readonly postRepository: PostRepository,
@@ -49,7 +50,7 @@ export class PostService {
             await this.tagService.getTagsByPostId(postId),
         ]);
         if (!foundPost) {
-            throw new NotFoundException('존재하지 않는 게시글입니다.');
+            throw new NotFoundException(POST_NOT_FOUND_ERROR_MESSAGE);
         }
         return plainToInstance(GetPostResDto, { ...foundPost, tags: foundTags });
     }
@@ -77,10 +78,10 @@ export class PostService {
         const { title, content, tags } = updatePostReqDto;
         const foundPost = await this.postRepository.getPost(postId);
         if (!foundPost) {
-            throw new NotFoundException('존재하지 않는 게시글입니다.');
+            throw new NotFoundException(POST_NOT_FOUND_ERROR_MESSAGE);
         }
         if (foundPost.authorId !== userId) {
-            throw new ForbiddenException('권한이 없습니다.');
+            throw new ForbiddenException(POST_FORBIDDEN_ERROR_MESSAGE);
         }
 
         return await this.prismaService.$transaction( async tx => { 
@@ -102,10 +103,10 @@ export class PostService {
     }): Promise<void> {
         const foundPost = await this.postRepository.getPost(postId);
         if (!foundPost) {
-            throw new NotFoundException('존재하지 않는 게시글입니다.');
+            throw new NotFoundException(POST_NOT_FOUND_ERROR_MESSAGE);
         }
         if (foundPost.authorId !== userId) {
-            throw new ForbiddenException('권한이 없습니다.');
+            throw new ForbiddenException(POST_FORBIDDEN_ERROR_MESSAGE);
         }
         
         return await this.prismaService.$transaction( async tx => {

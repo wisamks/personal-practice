@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostReqDto } from './dto/request/create-post.req.dto';
-import { ReqUser } from '@_/user/req-user.decorator';
-import { JwtAuthGuard } from '@_/auth/auth-jwt.guard';
+import { ReqUser } from '@_/user/decorators/req-user.decorator';
+import { JwtAuthGuard } from '@_/auth/guards/auth-jwt.guard';
 import { GetPostResDto } from './dto/response/get-post.res.dto';
 import { GetPostsReqDto } from './dto/request/get-posts.req.dto';
 import { CreatePostResDto } from './dto/response/create-post.res.dto';
