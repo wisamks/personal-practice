@@ -9,6 +9,7 @@ import { UserService } from '@_/user/user.service';
 import { UserModule } from '@_/user/user.module';
 import { ConfigService } from '@nestjs/config';
 import { PrismaModule } from '@_/prisma/prisma.module';
+import { PASSPORT_MODULE_OPTION } from './constants/auth.constants';
 
 @Module({
   imports: [
