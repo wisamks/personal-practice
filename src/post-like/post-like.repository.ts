@@ -54,11 +54,12 @@ export class PostLikeRepository {
             id,
             deletedAt: null,
         };
+        const data = {
+            deletedAt: new Date(),
+        };
         try {
             await this.prismaService.postLike.update({
-                data: {
-                    deletedAt: new Date(),
-                },
+                data,
                 where,
             });
         } catch(err) {

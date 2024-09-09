@@ -10,6 +10,7 @@ import { ReqUserGuard } from './auth/guards/optional-jwt.guard';
 import { CommentModule } from './comment/comment.module';
 import { PostLikeModule } from './post-like/post-like.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { PrismaModule } from './prisma/prisma.module';
     CommentModule,
     PostLikeModule,
     PrismaModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [
