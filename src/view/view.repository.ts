@@ -34,4 +34,13 @@ export class ViewRepository {
             throw new InternalServerErrorException(err.message);
         }
     };
+
+    async createViews(data: CreateViewInputType[]): Promise<void> {
+        try {
+            await this.prismaService.view.createMany({ data });
+        } catch(err) {
+            this.logger.error(err);
+            throw new InternalServerErrorException(err.message);
+        }
+    }
 }

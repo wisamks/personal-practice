@@ -13,6 +13,19 @@ export class PostLikeRepository {
         private readonly prismaService: PrismaService,
     ) {}
 
+    async getPostLikesByPostId(postId: number): Promise<PostLike[]> {
+        const where = {
+            postId,
+            deletedAt: null,
+        };
+        try {
+            return this.prismaService.postLike.findMany({ where });
+        } catch(err) {
+            this.logger.error(err);
+            throw new InternalServerErrorException(INTERNAL_SERVER_ERROR_MESSAGE);
+        }
+    }
+
     async getPostLikesCountByPostId(postId: number): Promise<number> {
         const where = {
             postId,
@@ -49,6 +62,16 @@ export class PostLikeRepository {
         }
     }
 
+    async createPostLikes(data: TogglePostLikeReqType[]): Promise<void> {
+        try {
+            await this.prismaService.postLike.createMany({ data });
+            return;
+        } catch(err) {
+            this.logger.error(err);
+            throw new InternalServerErrorException(INTERNAL_SERVER_ERROR_MESSAGE);
+        }
+    }
+
     async deletePostLike(id: number): Promise<void> {
         const where = {
             id,
@@ -59,6 +82,25 @@ export class PostLikeRepository {
         };
         try {
             await this.prismaService.postLike.update({
+                data,
+                where,
+            });
+        } catch(err) {
+            this.logger.error(err);
+            throw new InternalServerErrorException(INTERNAL_SERVER_ERROR_MESSAGE);
+        }
+    }
+
+    async deletePostLikes(ids: TogglePostLikeReqType): Promise<void> {
+        const where = {
+            ...ids,
+            deletedAt: null,
+        };
+        const data = {
+            deletedAt: new Date(),
+        };
+        try {
+            await this.prismaService.postLike.updateMany({
                 data,
                 where,
             });

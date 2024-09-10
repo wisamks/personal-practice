@@ -11,12 +11,14 @@ import { CommentModule } from './comment/comment.module';
 import { PostLikeModule } from './post-like/post-like.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     AuthModule,
     UserModule,
     PostModule,

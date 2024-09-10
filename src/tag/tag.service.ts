@@ -57,6 +57,11 @@ export class TagService {
 
         const relations = tagIds.map( tagId => ({ tagId, postId }));
         await this.postTagRepository.createRelations(tx, relations);
+
+        // 레디스 write through
+        const tagsKey = [REDIS_POSTS, postId, REDIS_TAGS].join(':');
+        await this.redisClient.set(tagsKey, JSON.stringify(tags), 'EX', ONE_HOUR_BY_SECOND);
+
         return;
     }
 

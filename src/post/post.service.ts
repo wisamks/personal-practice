@@ -154,6 +154,12 @@ export class PostService {
             if (tags && createdPost) {
                 await this.tagService.createTags(tx, { tags, postId: createdPost.id });
             }
+
+            // 레디스 write through
+            const postKey = [REDIS_POSTS, createdPost.id].join(':');
+            const foundPost = await this.postRepository.getPost(createdPost.id);
+            await this.redisClient.set(postKey, JSON.stringify(foundPost), 'EX', ONE_HOUR_BY_SECOND);
+            
             return plainToInstance(CreatePostResDto, createdPost);
         });
     }
@@ -179,7 +185,11 @@ export class PostService {
                 this.postRepository.updatePost(tx, { data: { title, content }, postId }),
                 this.tagService.updateTags(tx, { tags, postId }),
             ]);
-            await this.redisClient.del(postKey);
+
+            // 레디스 write through
+            const updatedPost = await this.postRepository.getPost(postId);
+            await this.redisClient.set(postKey, JSON.stringify(updatedPost), 'EX', ONE_HOUR_BY_SECOND);
+            
             return;
         });
            

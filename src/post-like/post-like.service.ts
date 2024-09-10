@@ -3,7 +3,7 @@ import { POST_LIKE_SERVICE } from './constants/post-like.constant';
 import { PostLikeRepository } from './post-like.repository';
 import { TogglePostLikeReqType } from './types/toggle-post-like.req';
 import { Redis } from 'ioredis';
-import { ONE_HOUR_BY_SECOND, REDIS_COUNT, REDIS_LIKES, REDIS_POSTS } from '@_/redis/constants/redis.constant';
+import { ONE_HOUR_BY_SECOND, REDIS_COUNT, REDIS_DEFAULT_ZERO, REDIS_LIKES, REDIS_LOG, REDIS_NEW, REDIS_OLD, REDIS_POSTS, REDIS_SET } from '@_/redis/constants/redis.constant';
 
 @Injectable()
 export class PostLikeService {
@@ -28,21 +28,33 @@ export class PostLikeService {
         return likesCount;
     }
 
-    async togglePostLike(data: TogglePostLikeReqType): Promise<void> {
-        const likesCountKey = [REDIS_POSTS, data.postId, REDIS_LIKES, REDIS_COUNT].join(':');
-        
-        const foundLike = await this.postLikeRepository.getPostLikeByPostAndUser(data);
-        const redisLikesCount = await this.redisClient.get(likesCountKey);
-
-        if (!foundLike) {
-            if (redisLikesCount) {
-                await this.redisClient.incr(likesCountKey);
-            }
-            return await this.postLikeRepository.createPostLike(data);
+    async togglePostLike({ userId, postId }: TogglePostLikeReqType): Promise<void> {
+        const likesCountKey = [REDIS_POSTS, postId, REDIS_LIKES, REDIS_COUNT].join(':');
+        const likeSetKey = [REDIS_POSTS, postId, REDIS_LIKES, REDIS_SET].join(':');
+        const likeOldSetKey = [likeSetKey, REDIS_OLD].join(':');
+        const likeNewSetKey = [likeSetKey, REDIS_NEW].join(':');
+        const redisLikeOldSet = await this.redisClient.smembers(likeOldSetKey);
+        if (!redisLikeOldSet) {
+            const dbLikes = await this.postLikeRepository.getPostLikesByPostId(postId);
+            const likeUsers = dbLikes.map(dbLike => dbLike.userId);
+            likeUsers.push(REDIS_DEFAULT_ZERO);
+            await this.redisClient.sadd(likeOldSetKey, likeUsers);
+            const setSize = await this.redisClient.scard(likeOldSetKey);
+            await this.redisClient.set(likesCountKey, setSize-1, 'EX', ONE_HOUR_BY_SECOND);
         }
-        if (redisLikesCount) {
+        const isUserInNewSet = await this.redisClient.sismember(likeNewSetKey, userId);
+        if (!isUserInNewSet) {
+            await this.redisClient.sadd(likeNewSetKey, userId);
+        } else {
+            await this.redisClient.srem(likeNewSetKey, userId);
+        }
+
+        const isUserInOldSet = await this.redisClient.sismember(likeOldSetKey, userId);
+        if(isUserInNewSet === isUserInOldSet) {
+            await this.redisClient.incr(likesCountKey);
+        } else {
             await this.redisClient.decr(likesCountKey);
         }
-        return await this.postLikeRepository.deletePostLike(foundLike.id);
+        return;
     }
 }
