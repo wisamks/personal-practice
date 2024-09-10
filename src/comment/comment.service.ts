@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CommentRepository } from './comment.repository';
 import { COMMENT_DELETE_TAKE, COMMENT_FORBIDDEN_ERROR_MESSAGE, COMMENT_NOT_FOUND_ERROR_MESSAGE, COMMENT_SERVICE } from './constants/comment.constant';
 import { CreateCommentReqDto } from './dto/request/create-comment.req.dto';
@@ -7,6 +7,9 @@ import { CreateCommentResDto } from './dto/response/create-comment.res.dto';
 import { GetCommentsReqDto } from './dto/request/get-comments.req.dto';
 import { GetCommentResDto } from './dto/response/get-comment.res.dto';
 import { UpdateCommentReqDto } from './dto/request/update-comment.req.dto';
+import { ONE_HOUR_BY_SECOND, REDIS_COMMENTS, REDIS_COUNT, REDIS_DEFAULT_PAGE, REDIS_POSTS } from '@_/redis/constants/redis.constant';
+import { Redis } from 'ioredis';
+import { Comment } from '@prisma/client';
 
 @Injectable()
 export class CommentService {
@@ -14,10 +17,39 @@ export class CommentService {
 
     constructor(
         private readonly commentRepository: CommentRepository,
+        @Inject('REDIS-CLIENT')
+        private readonly redisClient: Redis,
     ) {}
 
     async getCommentsCountByPostId(postId: number): Promise<number> {
-        return await this.commentRepository.getCommentsCountByPostId(postId);
+        const commentsCountKey = [REDIS_POSTS, postId, REDIS_COMMENTS, REDIS_COUNT].join(':');
+
+        const redisCommentsCount = await this.redisClient.get(commentsCountKey);
+        if (redisCommentsCount) {
+            return Number(redisCommentsCount);
+        }
+
+        const dbCommentsCount = await this.commentRepository.getCommentsCountByPostId(postId);
+        await this.redisClient.set(commentsCountKey, String(dbCommentsCount), 'EX', ONE_HOUR_BY_SECOND);
+        return dbCommentsCount;
+    }
+
+    async getCommentsFirstPage({ getCommentsReqDto, postId }: {
+        getCommentsReqDto: GetCommentsReqDto;
+        postId: number;
+    }): Promise<Comment[]> {
+        const commentsKey = [REDIS_POSTS, postId, REDIS_COMMENTS, REDIS_DEFAULT_PAGE].join(':');
+        const redisComments = await this.redisClient.get(commentsKey);
+        if (redisComments) {
+            return JSON.parse(redisComments);
+        }
+
+        const foundComments = await this.commentRepository.getCommentsByPostId({
+            ...getCommentsReqDto,
+            postId,
+        });
+        await this.redisClient.set(commentsKey, JSON.stringify(foundComments), 'EX', ONE_HOUR_BY_SECOND);
+        return foundComments;
     }
 
     async getCommentsByPostId({ getCommentsReqDto, postId }: {
@@ -36,11 +68,22 @@ export class CommentService {
         postId: number;
         userId: number;
     }): Promise<CreateCommentResDto> {
+        const commentsKey = [REDIS_POSTS, postId, REDIS_COMMENTS, REDIS_DEFAULT_PAGE].join(':');
+        const commentsCountKey = [REDIS_POSTS, postId, REDIS_COMMENTS, REDIS_COUNT].join(':');
+
         const createdResult = await this.commentRepository.createComment({
             ...createCommentReqDto,
             postId,
             authorId: userId,
         });
+
+        // 레디스
+        const redisCommentsCount = await this.redisClient.get(commentsCountKey);
+        if (redisCommentsCount) {
+            await this.redisClient.incr(commentsCountKey);
+        }
+        await this.redisClient.del(commentsKey);
+
         return plainToInstance(CreateCommentResDto, createdResult);
     }
 
@@ -56,6 +99,11 @@ export class CommentService {
         if (foundComment.authorId !== userId) {
             throw new ForbiddenException(COMMENT_FORBIDDEN_ERROR_MESSAGE);
         }
+
+        // 레디스
+        const commentsKey = [REDIS_POSTS, foundComment.postId, REDIS_COMMENTS, REDIS_DEFAULT_PAGE].join(':');
+        await this.redisClient.del(commentsKey);
+        
         return await this.commentRepository.updateComment({
             data: updateCommentReqDto,
             commentId,
@@ -79,6 +127,15 @@ export class CommentService {
             take: COMMENT_DELETE_TAKE,
         });
         await this.commentRepository.deleteComment(commentId);
+
+        // 레디스
+        const commentsKey = [REDIS_POSTS, foundComment.postId, REDIS_COMMENTS, REDIS_DEFAULT_PAGE].join(':');
+        const commentsCountKey = [REDIS_POSTS, foundComment.postId, REDIS_COMMENTS, REDIS_COUNT].join(':');
+        await Promise.all([
+            this.redisClient.del(commentsKey),
+            this.redisClient.decr(commentsCountKey)
+        ]);
+
         return plainToInstance(GetCommentResDto, nextComment[0]);
     }
 }

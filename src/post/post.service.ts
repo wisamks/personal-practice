@@ -9,13 +9,13 @@ import { PrismaService } from '@_/prisma/prisma.service';
 import { CreatePostResDto } from './dto/response/create-post.res.dto';
 import { UpdatePostReqDto } from './dto/request/update-post.req.dto';
 import { GetCursorReqDto } from './dto/request/get-cursor.req.dto';
-import { ONE_HOUR_BY_SECOND, POST_FORBIDDEN_ERROR_MESSAGE, POST_GET_COMMENT_REQ, POST_NOT_FOUND_ERROR_MESSAGE, POST_SERVICE, REDIS_COMMENTS, REDIS_COUNT, REDIS_DEFAULT_PAGE, REDIS_LIKES, REDIS_POSTS, REDIS_TAGS, REDIS_VIEWS } from './constants/post.constant';
+import { POST_FORBIDDEN_ERROR_MESSAGE, POST_GET_COMMENT_REQ, POST_NOT_FOUND_ERROR_MESSAGE, POST_SERVICE } from './constants/post.constant';
 import { CommentService } from '@_/comment/comment.service';
 import { ViewService } from '@_/view/view.service';
 import { PostLikeService } from '@_/post-like/post-like.service';
 import { Redis } from 'ioredis';
 import { Post } from '@prisma/client';
-import { GetCommentResDto } from '@_/comment/dto/response/get-comment.res.dto';
+import { ONE_HOUR_BY_SECOND, REDIS_COMMENTS, REDIS_COUNT, REDIS_DEFAULT_PAGE, REDIS_LIKES, REDIS_POSTS, REDIS_TAGS, REDIS_VIEWS } from '@_/redis/constants/redis.constant';
 
 @Injectable()
 export class PostService {
@@ -57,11 +57,6 @@ export class PostService {
         userId: number,
     }): Promise<GetPostResDto> {
         const postKey = [REDIS_POSTS, postId].join(':');
-        const tagsKey = [postKey, REDIS_TAGS].join(':');
-        const commentsKey = [postKey, REDIS_COMMENTS, REDIS_DEFAULT_PAGE].join(':');
-        const commentsCountKey = [postKey, REDIS_COMMENTS, REDIS_COUNT].join(':');
-        const viewsCountKey = [postKey, REDIS_VIEWS, REDIS_COUNT].join(':');
-        const likesCountKey = [postKey, REDIS_LIKES, REDIS_COUNT].join(':');
 
         // 기본 post 가져오고 없으면 에러
         let foundPost: Post;
@@ -76,82 +71,40 @@ export class PostService {
             await this.redisClient.set(postKey, JSON.stringify(dbPost), 'EX', ONE_HOUR_BY_SECOND);
             foundPost = dbPost;
         }
-        
-        // 태그 가져오기
-        let foundTags: string[];
-        const redisTags = await this.redisClient.get(tagsKey);
-        if (redisTags) {
-            foundTags = JSON.parse(redisTags);
-        } else {
-            const dbTags = await this.tagService.getTagsByPostId(postId);
-            await this.redisClient.set(tagsKey, JSON.stringify(dbTags), 'EX', ONE_HOUR_BY_SECOND);
-            foundTags = dbTags;
-        }
 
-        // 댓글 첫 페이지 가져오기
-        let foundComments: GetCommentResDto[];
-        const redisComments = await this.redisClient.get(commentsKey);
-        if (redisComments) {
-            foundComments = JSON.parse(redisComments);
-        } else {
-            const dbComments = await this.commentService.getCommentsByPostId({
+        const [
+            foundTags,
+            foundComments,
+            commentsCount,
+            likesCount,
+            viewsCount,
+        ] = await Promise.all([
+            this.tagService.getTagsByPostId(postId),
+            this.commentService.getCommentsFirstPage({
                 getCommentsReqDto: POST_GET_COMMENT_REQ,
                 postId,
-            });
-            await this.redisClient.set(commentsKey, JSON.stringify(dbComments), 'EX', ONE_HOUR_BY_SECOND);
-            foundComments = dbComments;
-        }
-
-        // 댓글 수 가져오기
-        let commentsCount: number;
-        const redisCommentsCount = await this.redisClient.get(commentsCountKey);
-        if (redisCommentsCount) {
-            commentsCount = Number(redisCommentsCount);
-        } else {
-            const dbCommentsCount = await this.commentService.getCommentsCountByPostId(postId);
-            await this.redisClient.set(commentsCountKey, String(dbCommentsCount), 'EX', ONE_HOUR_BY_SECOND);
-            commentsCount = dbCommentsCount;
-        }
-
-        // 좋아요 수 가져오기
-        let likesCount: number;
-        const redisLikesCount = await this.redisClient.get(likesCountKey);
-        if (redisLikesCount) {
-            likesCount = Number(redisLikesCount);
-        } else {
-            const dbLikesCount = await this.postLikeService.getPostLikesCountByPostId(postId);
-            await this.redisClient.set(likesCountKey, String(dbLikesCount), 'EX', ONE_HOUR_BY_SECOND);
-            likesCount = dbLikesCount;
-        }
+            }),
+            this.commentService.getCommentsCountByPostId(postId),
+            this.postLikeService.getPostLikesCountByPostId(postId),
+            this.viewService.getViewCountByPostId(postId)
+        ]);
         
-        // 조회 수 가져오기
-        let viewsCount: number;
-        const redisViewsCount = await this.redisClient.get(viewsCountKey);
-        if (redisViewsCount) {
-            viewsCount = Number(redisViewsCount) + 1;
-        } else {
-            const dbViewsCount = await this.viewService.getViewCountByPostId(postId);
-            await this.redisClient.set(viewsCountKey, String(dbViewsCount), 'EX', ONE_HOUR_BY_SECOND);
-            viewsCount = dbViewsCount + 1;
-        }
-        await this.redisClient.incr(viewsCountKey);
+        // 조회 수 올리기
         await this.viewService.createView({ postId, userId })
 
         // 각 정보들 객체로 저장
         const responseDto = {
             ...foundPost,
             tags: foundTags,
+            comments: foundComments,
             counts: {
-                viewsCount,
+                viewsCount: viewsCount + 1,
                 commentsCount,
                 likesCount
             },
         };
 
-        return {
-            ...plainToInstance(GetPostResDto, responseDto),
-            comments: foundComments
-        };
+        return plainToInstance(GetPostResDto, responseDto);
     }
 
     async createPost({createPostReqDto, userId}: {
@@ -174,6 +127,8 @@ export class PostService {
         postId: number;
         userId: number;
     }): Promise<void> {
+        const postKey = [REDIS_POSTS, postId].join(':');
+
         const { title, content, tags } = updatePostReqDto;
         const foundPost = await this.postRepository.getPost(postId);
         if (!foundPost) {
@@ -191,6 +146,7 @@ export class PostService {
             if (tags) {
                 await this.tagService.createTags(tx, { tags, postId });
             }
+            await this.redisClient.del(postKey);
             return;
         });
            
@@ -200,6 +156,12 @@ export class PostService {
         postId: number;
         userId: number;
     }): Promise<void> {
+        const postKey = [REDIS_POSTS, postId].join(':');
+        const commentsKey = [postKey, REDIS_COMMENTS, REDIS_DEFAULT_PAGE].join(':');
+        const commentsCountKey = [postKey, REDIS_COMMENTS, REDIS_COUNT].join(':');
+        const viewsCountKey = [postKey, REDIS_VIEWS, REDIS_COUNT].join(':');
+        const likesCountKey = [postKey, REDIS_LIKES, REDIS_COUNT].join(':');
+
         const foundPost = await this.postRepository.getPost(postId);
         if (!foundPost) {
             throw new NotFoundException(POST_NOT_FOUND_ERROR_MESSAGE);
@@ -212,6 +174,13 @@ export class PostService {
             await Promise.all([
                 this.postRepository.deletePost(tx, postId),
                 this.tagService.deleteTags(tx, postId),
+            ]);
+            await Promise.all([
+                this.redisClient.del(postKey),
+                this.redisClient.del(commentsKey),
+                this.redisClient.del(commentsCountKey),
+                this.redisClient.del(viewsCountKey),
+                this.redisClient.del(likesCountKey),
             ]);
             return;
         });

@@ -1,7 +1,9 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { TagRepository } from "./tag.repository";
 import { PostTagRepository } from "./post-tag.repository";
 import { TAG_SERVICE } from "./constants/tag.constant";
+import { ONE_HOUR_BY_SECOND, REDIS_POSTS, REDIS_TAGS } from "@_/redis/constants/redis.constant";
+import { Redis } from "ioredis";
 
 @Injectable()
 export class TagService {
@@ -10,15 +12,25 @@ export class TagService {
     constructor(
         private readonly tagRepository: TagRepository,
         private readonly postTagRepository: PostTagRepository,
+        @Inject('REDIS-CLIENT')
+        private readonly redisClient: Redis,
     ) {}
 
     async getTagsByPostId(postId: number): Promise<string[]> {
+        const tagsKey = [REDIS_POSTS, postId, REDIS_TAGS].join(':');
+        
+        const redisTags = await this.redisClient.get(tagsKey);
+        if (redisTags) {
+            return JSON.parse(redisTags);
+        }
+
         const foundRelations = await this.postTagRepository.getRelationsByPostId(postId);
         const foundTags = [];
         for (const relation of foundRelations) {
             const foundTag = await this.tagRepository.getTag(relation.tagId);
             foundTags.push(foundTag.name);
         }
+        await this.redisClient.set(tagsKey, JSON.stringify(foundTags), 'EX', ONE_HOUR_BY_SECOND);
         return foundTags;
     }
 
@@ -26,6 +38,9 @@ export class TagService {
         tags: string[];
         postId: number;
     }): Promise<void> {
+        const tagsKey = [REDIS_POSTS, postId, REDIS_TAGS].join(':');
+        await this.redisClient.del(tagsKey);
+
         const tagIds = [];
         const restTags = [];
 
@@ -49,6 +64,8 @@ export class TagService {
     }
 
     async deleteTags(tx: any, postId: number): Promise<void> {
+        const tagsKey = [REDIS_POSTS, postId, REDIS_TAGS].join(':');
+        await this.redisClient.del(tagsKey);
         return await this.postTagRepository.deleteRelationsByPostId(tx, postId);
     }
 }
