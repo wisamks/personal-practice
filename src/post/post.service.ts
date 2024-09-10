@@ -36,8 +36,26 @@ export class PostService {
         const foundPosts = await this.postRepository.getPostsByCursor(getCursorReqDto);
         const result = [];
         for (const foundPost of foundPosts) {
-            const foundTags = await this.tagService.getTagsByPostId(foundPost.id);
-            result.push(plainToInstance(GetPostResDto, { ...foundPost, tags: foundTags }))
+            const [
+                foundTags, 
+                commentsCount,
+                likesCount,
+                viewsCount,
+            ] = await Promise.all([
+                this.tagService.getTagsByPostId(foundPost.id),
+                this.commentService.getCommentsCountByPostId(foundPost.id),
+                this.postLikeService.getPostLikesCountByPostId(foundPost.id),
+                this.viewService.getViewCountByPostId(foundPost.id),
+            ]);
+            result.push(plainToInstance(GetPostResDto, { 
+                ...foundPost, 
+                tags: foundTags,
+                counts: {
+                    viewsCount,
+                    commentsCount,
+                    likesCount,
+                },
+            }))
         }
         return result;
     }
@@ -46,8 +64,26 @@ export class PostService {
         const foundPosts = await this.postRepository.getPosts(getPostsReqDto);
         const result = [];
         for (const foundPost of foundPosts) {
-            const foundTags = await this.tagService.getTagsByPostId(foundPost.id);
-            result.push(plainToInstance(GetPostResDto, { ...foundPost, tags: foundTags }))
+            const [
+                foundTags, 
+                commentsCount,
+                likesCount,
+                viewsCount,
+            ] = await Promise.all([
+                this.tagService.getTagsByPostId(foundPost.id),
+                this.commentService.getCommentsCountByPostId(foundPost.id),
+                this.postLikeService.getPostLikesCountByPostId(foundPost.id),
+                this.viewService.getViewCountByPostId(foundPost.id),
+            ]);
+            result.push(plainToInstance(GetPostResDto, { 
+                ...foundPost, 
+                tags: foundTags,
+                counts: {
+                    viewsCount,
+                    commentsCount,
+                    likesCount,
+                },
+            }))
         }
         return result;
     }
