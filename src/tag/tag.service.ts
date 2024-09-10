@@ -38,9 +38,6 @@ export class TagService {
         tags: string[];
         postId: number;
     }): Promise<void> {
-        const tagsKey = [REDIS_POSTS, postId, REDIS_TAGS].join(':');
-        await this.redisClient.del(tagsKey);
-
         const tagIds = [];
         const restTags = [];
 
@@ -60,6 +57,17 @@ export class TagService {
 
         const relations = tagIds.map( tagId => ({ tagId, postId }));
         await this.postTagRepository.createRelations(tx, relations);
+        return;
+    }
+
+    async updateTags(tx: any, { tags, postId }: {
+        tags: string[];
+        postId: number;
+    }): Promise<void> {
+        await this.deleteTags(tx, postId);
+        if (tags) {
+            await this.createTags(tx, { tags, postId });
+        }
         return;
     }
 

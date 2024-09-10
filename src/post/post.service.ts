@@ -177,11 +177,8 @@ export class PostService {
         return await this.prismaService.$transaction( async tx => { 
             await Promise.all([
                 this.postRepository.updatePost(tx, { data: { title, content }, postId }),
-                this.tagService.deleteTags(tx, postId),
+                this.tagService.updateTags(tx, { tags, postId }),
             ]);
-            if (tags) {
-                await this.tagService.createTags(tx, { tags, postId });
-            }
             await this.redisClient.del(postKey);
             return;
         });
