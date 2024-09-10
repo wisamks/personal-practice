@@ -28,17 +28,17 @@ export class ViewService {
         return foundViewsCount;
     }
  
-    async createView(data: CreateViewInputType): Promise<void> {
-        const viewsCountKey = [REDIS_POSTS, data.postId, REDIS_VIEWS, REDIS_COUNT].join(':');
-        const viewsLogKey = [REDIS_POSTS, data.postId, REDIS_VIEWS, REDIS_LOG].join(':');
+    async createView({ postId, userId }: CreateViewInputType): Promise<void> {
+        const viewsCountKey = [REDIS_POSTS, postId, REDIS_VIEWS, REDIS_COUNT].join(':');
+        const viewsLogKey = [REDIS_POSTS, postId, REDIS_VIEWS, REDIS_LOG].join(':');
 
         const redisViewsCount = await this.redisClient.get(viewsCountKey);
         if (!redisViewsCount) {
-            const dbViewsCount = await this.viewRepository.getViewCountByPostId(data.postId);
+            const dbViewsCount = await this.viewRepository.getViewCountByPostId(postId);
             await this.redisClient.set(viewsCountKey, dbViewsCount, 'EX', ONE_HOUR_BY_SECOND);
         }
         const viewLog = {
-            userId: data.userId,
+            userId,
             createdAt: new Date(),
         };
         await this.redisClient.rpush(viewsLogKey, JSON.stringify(viewLog));
