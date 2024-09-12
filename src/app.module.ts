@@ -30,10 +30,6 @@ import { ScheduleModule } from '@nestjs/schedule';
   controllers: [AppController],
   providers: [
     AppService,
-    {
-      provide: APP_GUARD,
-      useClass: ReqUserGuard,
-    },
   ],
 })
 export class AppModule {}

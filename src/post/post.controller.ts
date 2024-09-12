@@ -8,12 +8,13 @@ import { GetPostsReqDto } from './dto/request/get-posts.req.dto';
 import { CreatePostResDto } from './dto/response/create-post.res.dto';
 import { UpdatePostReqDto } from './dto/request/update-post.req.dto';
 import { GetCursorReqDto } from './dto/request/get-cursor.req.dto';
+import { PATH_POST, PATH_ROUTES } from '@_/common/common.constant';
 
-@Controller('posts')
+@Controller(PATH_ROUTES.POST)
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
-  @Get('/cursor')
+  @Get(PATH_POST.CURSOR)
   @HttpCode(HttpStatus.OK)
   async getPostsByCursor(
     @Query() getCursorReqDto: GetCursorReqDto,
@@ -29,7 +30,7 @@ export class PostController {
     return await this.postService.getPosts(getPostsReqDto);
   }
 
-  @Get('/:postId')
+  @Get(PATH_POST.POST_ID)
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   async getPost(
@@ -49,7 +50,7 @@ export class PostController {
     return await this.postService.createPost({ createPostReqDto, userId });
   }
 
-  @Put('/:postId')
+  @Put(PATH_POST.POST_ID)
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
   async updatePost(
@@ -60,7 +61,7 @@ export class PostController {
     return await this.postService.updatePost({ updatePostReqDto, postId, userId });
   }
 
-  @Delete('/:postId')
+  @Delete(PATH_POST.POST_ID)
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
   async deletePost(

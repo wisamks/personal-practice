@@ -6,8 +6,9 @@ import { CreateUserReqDto } from './dto/request/create-user.req.dto';
 import { GetUserResDto } from './dto/response/get-user.res.dto';
 import { ReqUser } from './decorators/req-user.decorator';
 import { JwtAuthGuard } from '@_/auth/guards/auth-jwt.guard';
+import { PATH_ROUTES, PATH_USER } from '@_/common/common.constant';
 
-@Controller('users')
+@Controller(PATH_ROUTES.USER)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -17,7 +18,7 @@ export class UserController {
     return await this.userService.getUsers();
   }
 
-  @Get('/:userId')
+  @Get(PATH_USER.USER_ID)
   @HttpCode(HttpStatus.OK)
   async getUser(
     @Param('userId', ParseIntPipe) userId: number,
@@ -25,7 +26,7 @@ export class UserController {
     return await this.userService.getUser(userId);
   }
 
-  @Post('/sign-up')
+  @Post(PATH_USER.SIGN_UP)
   @HttpCode(HttpStatus.CREATED)
   async createUser(
     @Body() createUserReqDto: CreateUserReqDto,
