@@ -12,6 +12,7 @@ import { PostLikeModule } from './post-like/post-like.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { OptionalSessionGuard } from './auth/guards/optional-session.guard';
 
 @Module({
   imports: [
@@ -30,10 +31,6 @@ import { ScheduleModule } from '@nestjs/schedule';
   controllers: [AppController],
   providers: [
     AppService,
-    {
-      provide: APP_GUARD,
-      useClass: ReqUserGuard,
-    },
   ],
 })
 export class AppModule {}

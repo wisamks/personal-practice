@@ -7,8 +7,9 @@ import { CreateCommentResDto } from './dto/response/create-comment.res.dto';
 import { GetCommentResDto } from './dto/response/get-comment.res.dto';
 import { GetCommentsReqDto } from './dto/request/get-comments.req.dto';
 import { UpdateCommentReqDto } from './dto/request/update-comment.req.dto';
+import { PATH_COMMENT, PATH_ROUTES } from '@_/common/common.constant';
 
-@Controller('posts/:postId/comments')
+@Controller(PATH_ROUTES.COMMENT)
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
@@ -32,7 +33,7 @@ export class CommentController {
     return await this.commentService.createComment({ createCommentReqDto, postId, userId });
   }
   
-  @Put('/:commentId')
+  @Put(PATH_COMMENT.COMMENT_ID)
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
   async updateComment(
@@ -43,7 +44,7 @@ export class CommentController {
     return await this.commentService.updateComment({ updateCommentReqDto, commentId, userId });
   }
 
-  @Delete('/:commentId')
+  @Delete(PATH_COMMENT.COMMENT_ID)
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   async deleteComment(

@@ -7,6 +7,7 @@ import { SignUpResDto } from "./dto/response/sign-up.res.dto";
 import { JwtService } from "@nestjs/jwt";
 import { SignInReqDto } from "./dto/request/sign-in.req.dto";
 import { AUTH_SERVICE, SIGN_IN_ERROR_MESSAGE } from "./constants/auth.constants";
+import { ValidateUserOutputType } from "./types/validate-user.output";
 
 @Injectable()
 export class AuthService {
@@ -35,6 +36,16 @@ export class AuthService {
             this.logger.error(err);
             throw new InternalServerErrorException(err.message);
         }
+    }
+
+    async validateUser(signInReqDto: SignInReqDto): Promise<ValidateUserOutputType> {
+        const foundUser = await this.userRepository.getUserByEmail(signInReqDto.email);
+        const checkPassword = await bcrypt.compare(signInReqDto.password, foundUser?.password);
+        if (!foundUser || !checkPassword) {
+            throw new BadRequestException(SIGN_IN_ERROR_MESSAGE);
+        }
+
+        return { userId: foundUser.id };
     }
 
     async signUp(signUpReqDto: SignUpReqDto): Promise<SignUpResDto> {

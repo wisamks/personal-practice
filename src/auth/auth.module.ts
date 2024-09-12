@@ -7,6 +7,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { UserModule } from '@_/user/user.module';
 import { ConfigService } from '@nestjs/config';
 import { PASSPORT_MODULE_OPTION } from './constants/auth.constants';
+import { SessionSerializer } from './session.serializer';
+import { LocalStrategy } from './strategies/local.strategy';
 
 @Module({
   imports: [
@@ -24,7 +26,7 @@ import { PASSPORT_MODULE_OPTION } from './constants/auth.constants';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
-  exports: [PassportModule, JwtStrategy]
+  providers: [AuthService, JwtStrategy, SessionSerializer, LocalStrategy],
+  exports: [ SessionSerializer, JwtStrategy, LocalStrategy]
 })
 export class AuthModule {}
