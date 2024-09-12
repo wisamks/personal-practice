@@ -5,8 +5,10 @@ import { SignUpResDto } from "./dto/response/sign-up.res.dto";
 import { SignInReqDto } from "./dto/request/sign-in.req.dto";
 import { Response } from "express";
 import { JwtAuthGuard } from "./guards/auth-jwt.guard";
-import { AUTH_CONTROLLER, COOKIE_ACCESS_TOKEN_NAME } from "./constants/auth.constants";
+import { AUTH_CONTROLLER, COOKIE_ACCESS_TOKEN_NAME, COOKIE_REFRESH_TOKEN_NAME, ONE_HOUR_BY_MS, ONE_WEEK_BY_MS } from "./constants/auth.constants";
 import { PATH_AUTH, PATH_ROUTES } from "@_/common/common.constant";
+import { ReqUser } from "@_/user/decorators/req-user.decorator";
+import { RefreshAuthGuard } from "./guards/auth-refresh.guard";
 
 @Controller(PATH_ROUTES.AUTH)
 export class AuthController {
@@ -20,11 +22,15 @@ export class AuthController {
         @Body() signInReqDto: SignInReqDto,
         @Res() res: Response,
     ): Promise<Response> {
-        const { accessToken } = await this.authService.signIn(signInReqDto);
+        const { accessToken, refreshToken } = await this.authService.signIn(signInReqDto);
         res.cookie(COOKIE_ACCESS_TOKEN_NAME, accessToken, {
             httpOnly: true,
-            maxAge: 3600000,
+            maxAge: ONE_HOUR_BY_MS,
         });
+        res.cookie(COOKIE_REFRESH_TOKEN_NAME, refreshToken, {
+            httpOnly: true,
+            maxAge: ONE_WEEK_BY_MS,
+        })
         return res.end();
     }
 
@@ -33,8 +39,12 @@ export class AuthController {
     @UseGuards(JwtAuthGuard)
     async signOut(
         @Res() res: Response,
+        @ReqUser('userId') userId: number,
     ): Promise<Response> {
+        await this.authService.signOut(userId);
+
         res.clearCookie(COOKIE_ACCESS_TOKEN_NAME);
+        res.clearCookie(COOKIE_REFRESH_TOKEN_NAME);
         return res.end();
     }
 
@@ -44,5 +54,21 @@ export class AuthController {
         @Body() signUpReqDto: SignUpReqDto,
     ): Promise<SignUpResDto> {
         return await this.authService.signUp(signUpReqDto);
+    }
+
+    @Post(PATH_AUTH.REFRESH)
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @UseGuards(RefreshAuthGuard)
+    async getAccessFromRefresh(
+        @Res() res: Response,
+        @ReqUser('userId') userId: number,
+    ): Promise<Response> {
+        const accessToken = await this.authService.getAccessToken(userId);
+
+        res.cookie(COOKIE_ACCESS_TOKEN_NAME, accessToken, {
+            httpOnly: true,
+            maxAge: ONE_HOUR_BY_MS,
+        });
+        return res.end();
     }
 }

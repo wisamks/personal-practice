@@ -24,6 +24,10 @@ model User {
   password String     @db.VarChar(255)
   name String         @db.VarChar(50)
 
+  refreshToken String? @db.Text @map("refresh_token")
+  provider String?     @db.VarChar(6)
+  providerId String?   @db.Text
+
   posts Post[]
   comments Comment[]
   postLikes PostLike[]

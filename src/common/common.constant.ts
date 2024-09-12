@@ -19,6 +19,7 @@ export const PATH_AUTH = {
     SIGN_IN: '/sign-in',
     SIGN_OUT: '/sign-out',
     SIGN_UP: '/sign-up',
+    REFRESH: '/refresh',
 };
 
 export const PATH_COMMENT = {

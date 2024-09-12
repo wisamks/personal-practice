@@ -83,6 +83,42 @@ export class UserRepository {
             throw new InternalServerErrorException(err.message);
         }
     }
+
+    async updateUserCreateRefresh({ userId, refreshToken }: {
+        userId: number,
+        refreshToken: string,
+    }): Promise<void> {
+        const where = {
+            id: userId,
+            deletedAt: null,
+        };
+        const data = {
+            refreshToken
+        };
+        try {
+            await this.prismaService.user.update({ where, data });
+            return;
+        } catch(err) {
+            this.logger.error(err);
+            throw new InternalServerErrorException(err.message);
+        }
+    }
+
+    async updateUserDeleteRefresh(userId: number): Promise<void> {
+        const where = {
+            id: userId,
+            deletedAt: null,
+        };
+        try {
+            await this.prismaService.user.update({ where, data: {
+                refreshToken: null,
+            }});
+            return;
+        } catch(err) {
+            this.logger.error(err);
+            throw new InternalServerErrorException(err.message);
+        }
+    }
     
     async deleteUser(userId: number) {
         const where = {

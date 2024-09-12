@@ -29,6 +29,11 @@ export class UserService {
         return plainToInstance(GetUserResDto, foundUser);
     }
 
+    async getRefreshToken(userId: number): Promise<string> {
+        const foundUser = await this.userRepository.getUserById(userId);
+        return foundUser.refreshToken;
+    }
+
     async createUser(createUserReqDto: CreateUserReqDto): Promise<CreateUserResDto> {
         const foundUser = await this.userRepository.getUserByEmail(createUserReqDto.email);
         if (foundUser) {
@@ -65,5 +70,18 @@ export class UserService {
         }
         return await this.userRepository.deleteUser(userId);
     }
+
+    async createRefresh(data: {
+        userId: number;
+        refreshToken: string;
+    }): Promise<void> {
+        await this.userRepository.updateUserCreateRefresh(data);
+        return;
+    }
+
+    async deleteRefresh(userId: number): Promise<void> {
+        await this.userRepository.updateUserDeleteRefresh(userId);
+        return;
+    } 
 }
 
