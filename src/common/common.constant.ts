@@ -17,6 +17,8 @@ export const PATH_ROUTES = {
 };
 
 export const PATH_AUTH = {
+    NAVER: '/naver',
+    NAVER_CALLBACK: '/naver/callback',
     GOOGLE: '/google',
     GOOGLE_CALLBACK: '/google/callback',
     PROFILE: '/profile',

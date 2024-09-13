@@ -18,6 +18,31 @@ export class AuthController {
 
     constructor(private readonly authService: AuthService) {}
 
+    @Get(PATH_AUTH.NAVER)
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @UseGuards(AuthGuard('naver'))
+    async naverLogin() {}
+
+    @Get(PATH_AUTH.NAVER_CALLBACK)
+    @HttpCode(HttpStatus.PERMANENT_REDIRECT)
+    @UseGuards(AuthGuard('naver'))
+    @Redirect(PATH_CLIENT.DEV)
+    async naverCallback(
+        @ReqUser() user: OauthUserOutputType,
+        @Res() res: Response,
+    ) {
+        const { accessToken, refreshToken } = await this.authService.oauthLogin(user);
+        res.cookie(COOKIE_ACCESS_TOKEN_NAME, accessToken, {
+            httpOnly: true,
+            maxAge: ONE_HOUR_BY_MS,
+        });
+        res.cookie(COOKIE_REFRESH_TOKEN_NAME, refreshToken, {
+            httpOnly: true,
+            maxAge: ONE_WEEK_BY_MS,
+        })
+        return;
+    }
+
     @Get(PATH_AUTH.GOOGLE)
     @HttpCode(HttpStatus.NO_CONTENT)
     @UseGuards(AuthGuard('google'))

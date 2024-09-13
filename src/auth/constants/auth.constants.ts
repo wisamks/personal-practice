@@ -3,6 +3,7 @@ export const SIGN_IN_ERROR_MESSAGE = '이메일 또는 비밀번호가 일치하
 export const AUTH_CONTROLLER = 'AuthController';
 export const AUTH_SERVICE = 'AuthService';
 export const GOOGLE_STRATEGY = 'GoogleStrategy';
+export const NAVER_STRATEGY = 'NaverStrategy';
 
 export const PASSPORT_MODULE_OPTION = {
     defaultStrategy: 'jwt',
