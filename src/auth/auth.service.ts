@@ -13,6 +13,7 @@ import { SignInResDto } from "./dto/response/sign-in.res.dto";
 import { plainToInstance } from "class-transformer";
 import { Redis } from "ioredis";
 import { ONE_WEEK_BY_SECOND, REDIS_REFRESH_TOKEN, REDIS_USERS } from "@_/redis/constants/redis.constant";
+import { OauthUserOutputType } from "./types/oauth-user.output";
 
 @Injectable()
 export class AuthService {
@@ -52,13 +53,48 @@ export class AuthService {
         return await bcrypt.compare(refreshToken, redisRefresh);
     }
 
+    async oauthLogin(user: OauthUserOutputType): Promise<SignInResDto> {
+        const foundUser = await this.userService.getUserOauth({
+            provider: user.provider,
+            providerId: user.providerId,
+        });
+        if (!foundUser) {
+            const createdUser = await this.userService.createUser({
+                ...user,
+                password: user.provider,
+            });
+            return this.getTokens({ userId: createdUser.userId });
+        }
+        return this.getTokens({ userId: foundUser.userId });
+    }
+
     async signIn(signInReqDto: SignInReqDto): Promise<SignInResDto> {
+        const payload = await this.validateUser(signInReqDto);
+        
+        return this.getTokens(payload);
+    }
+
+    async signOut(userId: number): Promise<void> {
+        await this.userService.deleteRefresh(userId);
+        return;
+    }
+
+    async signUp(signUpReqDto: SignUpReqDto): Promise<SignUpResDto> {
+        return await this.userService.createUser(signUpReqDto);
+    }
+
+    async getAccessToken(userId: number): Promise<string> {
+        return await this.generateToken({ userId });
+    }
+
+    // --- private ---
+
+    private async getTokens(payload: SignInOutputType): Promise<SignInResDto> {
         const refreshOptions = {
             secret: process.env.JWT_REFRESH_TOKEN_SECRET,
             expiresIn: process.env.JWT_REFRESH_EXPIRE,
         };
         
-        const payload = await this.validateUser(signInReqDto);
         const [accessToken, refreshToken] = await Promise.all([
             this.generateToken(payload),
             this.generateToken(payload, refreshOptions),
@@ -74,19 +110,6 @@ export class AuthService {
         // await this.userService.createRefresh({ userId: payload.userId, refreshToken: hashedRefreshToken });
 
         return plainToInstance(SignInResDto, { accessToken, refreshToken });
-    }
-
-    async signOut(userId: number): Promise<void> {
-        await this.userService.deleteRefresh(userId);
-        return;
-    }
-
-    async signUp(signUpReqDto: SignUpReqDto): Promise<SignUpResDto> {
-        return await this.userService.createUser(signUpReqDto);
-    }
-
-    async getAccessToken(userId: number): Promise<string> {
-        return await this.generateToken({ userId });
     }
 
     private async generateToken(payload: SignInOutputType): Promise<string>;

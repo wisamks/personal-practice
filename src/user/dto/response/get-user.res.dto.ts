@@ -1,3 +1,4 @@
+import { ProviderType } from "@_/auth/types/oauth-user.output";
 import { Exclude, Expose } from "class-transformer";
 
 export class GetUserResDto {
@@ -10,6 +11,15 @@ export class GetUserResDto {
     readonly password: string;
     
     readonly name: string;
+
+    @Exclude()
+    readonly provider: ProviderType;
+
+    @Exclude()
+    readonly providerId: string;
+
+    @Exclude()
+    readonly refreshToken: string;
     
     @Exclude()
     readonly createdAt: Date;

@@ -4,6 +4,10 @@ export const PATH_API = '/api';
 
 const PATH_POST_PREFIX = '/posts/:postId';
 
+export const PATH_CLIENT = {
+    DEV: 'http://localhost:3000'
+}
+
 export const PATH_ROUTES = {
     AUTH: '/auth',
     POST: '/posts',
@@ -13,6 +17,8 @@ export const PATH_ROUTES = {
 };
 
 export const PATH_AUTH = {
+    GOOGLE: '/google',
+    GOOGLE_CALLBACK: '/google/callback',
     PROFILE: '/profile',
     LOGIN: '/login',
     LOGOUT: '/logout',

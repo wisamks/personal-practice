@@ -4,14 +4,16 @@ import { ExtractJwt, Strategy } from "passport-jwt";
 import { Request } from "express";
 import { AuthService } from "../auth.service";
 import { FORBIDDEN_MESSAGE } from "@nestjs/core/guards";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
     constructor(
+        private readonly configService: ConfigService,
         private readonly authService: AuthService,
     ) {
         super({
-            secretOrKey: process.env.JWT_REFRESH_TOKEN_SECRET,
+            secretOrKey: configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
             jwtFromRequest: ExtractJwt.fromExtractors([(req: Request) => {
                 const { refreshToken } = req.cookies;
                 return refreshToken ? refreshToken : null;

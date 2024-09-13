@@ -5,8 +5,6 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import { PostModule } from './post/post.module';
-import { APP_GUARD } from '@nestjs/core';
-import { ReqUserGuard } from './auth/guards/optional-jwt.guard';
 import { CommentModule } from './comment/comment.module';
 import { PostLikeModule } from './post-like/post-like.module';
 import { PrismaModule } from './prisma/prisma.module';

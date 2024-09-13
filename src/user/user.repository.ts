@@ -2,6 +2,7 @@ import { PrismaService } from "@_/prisma/prisma.service";
 import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { Prisma, User } from "@prisma/client";
 import { USER_REPOSITORY } from "./constants/user.constant";
+import { ProviderOptionsType } from "./types/provider-options";
 
 @Injectable()
 export class UserRepository {
@@ -45,6 +46,19 @@ export class UserRepository {
     async getUserByEmail(email: string): Promise<User> {
         const where = {
             email,
+            deletedAt: null,
+        };
+        try {
+            return await this.prismaService.user.findFirst({ where });
+        } catch(err) {
+            this.logger.error(err);
+            throw new InternalServerErrorException(err.message);
+        }
+    }
+
+    async getUserByProviderOptions(providerOptions: ProviderOptionsType): Promise<User> {
+        const where = {
+            ...providerOptions,
             deletedAt: null,
         };
         try {

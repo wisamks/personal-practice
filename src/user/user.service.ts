@@ -7,6 +7,7 @@ import { CreateUserResDto } from './dto/response/create-user.res.dto';
 import { UpdateUserReqDto } from './dto/request/update-user.req.dto';
 import { UserRepository } from './user.repository';
 import { USER_CONFLICT_ERROR_MESSAGE, USER_NOT_FOUND_ERROR_MESSAGE, USER_SERVICE } from './constants/user.constant';
+import { ProviderOptionsType } from './types/provider-options';
 
 @Injectable()
 export class UserService {
@@ -26,6 +27,11 @@ export class UserService {
         if (!foundUser) {
             throw new NotFoundException(USER_NOT_FOUND_ERROR_MESSAGE);
         }
+        return plainToInstance(GetUserResDto, foundUser);
+    }
+
+    async getUserOauth(providerOptions: ProviderOptionsType): Promise<GetUserResDto> {
+        const foundUser = await this.userRepository.getUserByProviderOptions(providerOptions);
         return plainToInstance(GetUserResDto, foundUser);
     }
 

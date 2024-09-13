@@ -1,4 +1,5 @@
-import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator";
+import { ProviderType } from "@_/auth/types/oauth-user.output";
+import { IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 
 export class CreateUserReqDto {
     @IsNotEmpty({ message: 'email은 필수값입니다.' })
@@ -15,4 +16,10 @@ export class CreateUserReqDto {
     @IsString({ message: 'name은 string입니다.' })
     @MaxLength(30, { message: 'name은 30글자 이하입니다.'})
     readonly name: string;
+
+    @IsOptional()
+    readonly provider: ProviderType;
+
+    @IsOptional()
+    readonly providerId: string;
 }

@@ -14,6 +14,12 @@ datasource db {
   shadowDatabaseUrl = env("SHADOW_MYSQL_URL")
 }
 
+enum Provider {
+  google
+  naver
+  kakao
+}
+
 model User {
   id  Int @default(autoincrement()) @id @db.UnsignedInt
   createdAt DateTime  @default(now()) @map("created_at")  @db.Timestamp(3)
@@ -25,7 +31,7 @@ model User {
   name String         @db.VarChar(50)
 
   refreshToken String? @db.Text @map("refresh_token")
-  provider String?     @db.VarChar(6)
+  provider Provider
   providerId String?   @db.Text
 
   posts Post[]
