@@ -8,10 +8,17 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// 기존 rds
+// datasource db {
+//   provider = "mysql"
+//   url      = env("MYSQL_URL")
+//   shadowDatabaseUrl = env("SHADOW_MYSQL_URL")
+// }
+
 datasource db {
   provider = "mysql"
-  url      = env("MYSQL_URL")
-  shadowDatabaseUrl = env("SHADOW_MYSQL_URL")
+  url = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 enum Provider {
@@ -31,7 +38,7 @@ model User {
   name String         @db.VarChar(50)
 
   refreshToken String? @db.Text @map("refresh_token")
-  provider Provider
+  provider Provider?
   providerId String?   @db.Text
 
   posts Post[]
