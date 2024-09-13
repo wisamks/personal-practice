@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { UserService } from "@_/user/user.service";
 import { UserRepository } from "@_/user/user.repository";
 import * as bcrypt from 'bcryptjs';
@@ -11,6 +11,8 @@ import { SignInOutputType } from "./types/sign-in.output";
 import { RefreshInputType } from "./types/refresh.input";
 import { SignInResDto } from "./dto/response/sign-in.res.dto";
 import { plainToInstance } from "class-transformer";
+import { Redis } from "ioredis";
+import { ONE_WEEK_BY_SECOND, REDIS_REFRESH_TOKEN, REDIS_USERS } from "@_/redis/constants/redis.constant";
 
 @Injectable()
 export class AuthService {
@@ -20,6 +22,8 @@ export class AuthService {
         private readonly userService: UserService,
         private readonly userRepository: UserRepository,
         private readonly jwtService: JwtService,
+        @Inject('REDIS-CLIENT')
+        private readonly redisClient: Redis,
     ) {}
 
     async validateUser(signInReqDto: SignInReqDto): Promise<SignInOutputType> {
@@ -38,8 +42,14 @@ export class AuthService {
         userId: number;
         refreshToken: string;
     }): Promise<boolean> {
-        const dbRefreshToken = await this.userService.getRefreshToken(userId);
-        return await bcrypt.compare(refreshToken, dbRefreshToken);
+        // REDIS에서 토큰 가져오기
+        const refreshKey = [REDIS_USERS, userId, REDIS_REFRESH_TOKEN].join(':');
+        const redisRefresh = await this.redisClient.get(refreshKey);
+
+        // MYSQL에서 토큰 가져오기
+        // const dbRefreshToken = await this.userService.getRefreshToken(userId);
+
+        return await bcrypt.compare(refreshToken, redisRefresh);
     }
 
     async signIn(signInReqDto: SignInReqDto): Promise<SignInResDto> {
@@ -47,15 +57,21 @@ export class AuthService {
             secret: process.env.JWT_REFRESH_TOKEN_SECRET,
             expiresIn: process.env.JWT_REFRESH_EXPIRE,
         };
-
+        
         const payload = await this.validateUser(signInReqDto);
         const [accessToken, refreshToken] = await Promise.all([
             this.generateToken(payload),
             this.generateToken(payload, refreshOptions),
         ]);
+        
+        const refreshKey = [REDIS_USERS, payload.userId, REDIS_REFRESH_TOKEN].join(':');
 
         const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
-        await this.userService.createRefresh({ userId: payload.userId, refreshToken: hashedRefreshToken });
+        // 레디스를 토큰 저장소로 사용하기
+        await this.redisClient.set(refreshKey, hashedRefreshToken, 'EX', ONE_WEEK_BY_SECOND);
+        
+        // MYSQL을 토큰 저장소로 사용하기
+        // await this.userService.createRefresh({ userId: payload.userId, refreshToken: hashedRefreshToken });
 
         return plainToInstance(SignInResDto, { accessToken, refreshToken });
     }
