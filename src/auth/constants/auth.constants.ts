@@ -4,6 +4,7 @@ export const AUTH_CONTROLLER = 'AuthController';
 export const AUTH_SERVICE = 'AuthService';
 export const GOOGLE_STRATEGY = 'GoogleStrategy';
 export const NAVER_STRATEGY = 'NaverStrategy';
+export const KAKAO_STRATEGY = 'KakaoStrategy';
 
 export const PASSPORT_MODULE_OPTION = {
     defaultStrategy: 'jwt',

@@ -18,6 +18,31 @@ export class AuthController {
 
     constructor(private readonly authService: AuthService) {}
 
+    @Get(PATH_AUTH.KAKAO)
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @UseGuards(AuthGuard('kakao'))
+    async kakaoLogin() {}
+
+    @Get(PATH_AUTH.KAKAO_CALLBACK)
+    @HttpCode(HttpStatus.PERMANENT_REDIRECT)
+    @UseGuards(AuthGuard('kakao'))
+    @Redirect(PATH_CLIENT.DEV)
+    async kakaoCallback(
+        @ReqUser() user: OauthUserOutputType,
+        @Res() res: Response,
+    ) {
+        const { accessToken, refreshToken } = await this.authService.oauthLogin(user);
+        res.cookie(COOKIE_ACCESS_TOKEN_NAME, accessToken, {
+            httpOnly: true,
+            maxAge: ONE_HOUR_BY_MS,
+        });
+        res.cookie(COOKIE_REFRESH_TOKEN_NAME, refreshToken, {
+            httpOnly: true,
+            maxAge: ONE_WEEK_BY_MS,
+        })
+        return;
+    }
+
     @Get(PATH_AUTH.NAVER)
     @HttpCode(HttpStatus.NO_CONTENT)
     @UseGuards(AuthGuard('naver'))

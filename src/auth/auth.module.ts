@@ -10,6 +10,7 @@ import { PASSPORT_MODULE_OPTION } from './constants/auth.constants';
 import { RefreshStrategy } from './strategies/refresh.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { NaverStrategy } from './strategies/naver.strategy';
+import { KakaoStrategy } from './strategies/kakao.strategy';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { NaverStrategy } from './strategies/naver.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, RefreshStrategy, GoogleStrategy, NaverStrategy],
+  providers: [AuthService, JwtStrategy, RefreshStrategy, GoogleStrategy, NaverStrategy, KakaoStrategy],
   exports: [PassportModule, JwtStrategy]
 })
 export class AuthModule {}

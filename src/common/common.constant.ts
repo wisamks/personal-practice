@@ -17,6 +17,8 @@ export const PATH_ROUTES = {
 };
 
 export const PATH_AUTH = {
+    KAKAO: '/kakao',
+    KAKAO_CALLBACK: '/kakao/callback',
     NAVER: '/naver',
     NAVER_CALLBACK: '/naver/callback',
     GOOGLE: '/google',
