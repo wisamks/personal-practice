@@ -65,10 +65,8 @@ export class AuthService {
                 password: user.provider,
             });
             const tokens = this.getTokens({ userId: createdUser.userId });
-            this.logger.log(AUTH_LOG_MESSAGE.LOGIN, createdUser.userId);
         }
         const tokens = this.getTokens({ userId: foundUser.userId });
-        this.logger.log(AUTH_LOG_MESSAGE.LOGIN, foundUser.userId);
         return tokens;
     }
 
@@ -76,13 +74,11 @@ export class AuthService {
         const payload = await this.validateUser(signInReqDto);
         
         const tokens = this.getTokens(payload);
-        this.logger.log(AUTH_LOG_MESSAGE.LOGIN, payload.userId);
         return tokens;
     }
 
     async signOut(userId: number): Promise<void> {
         await this.userService.deleteRefresh(userId);
-        this.logger.log(AUTH_LOG_MESSAGE.LOGOUT + userId);
         return;
     }
 

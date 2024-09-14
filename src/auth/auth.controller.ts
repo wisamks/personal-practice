@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Logger, Post, Redirect, Res, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Logger, Post, Redirect, Res, UseGuards, UseInterceptors } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { SignUpReqDto } from "./dto/request/sign-up.req.dto";
 import { SignUpResDto } from "./dto/response/sign-up.res.dto";
@@ -11,6 +11,7 @@ import { ReqUser } from "@_/user/decorators/req-user.decorator";
 import { RefreshAuthGuard } from "./guards/refresh-auth.guard";
 import { AuthGuard } from "@nestjs/passport";
 import { IOauthUserOutput } from "./types/oauth-user.output.interface";
+import { SignInLogInterceptor } from "./interceptors/sign-in-log.interceptor";
 
 @Controller(PATH_ROUTES.AUTH)
 export class AuthController {
@@ -95,6 +96,7 @@ export class AuthController {
 
     @Post(PATH_AUTH.SIGN_IN)
     @HttpCode(HttpStatus.NO_CONTENT)
+    @UseInterceptors(SignInLogInterceptor)
     async signIn(
         @Body() signInReqDto: SignInReqDto,
         @Res() res: Response,
