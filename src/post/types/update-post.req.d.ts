@@ -1,3 +1,3 @@
-import { CreatePostReqType } from "./create-post.req";
+import { CreatePostReqType } from "./create-post.req.interface";
 
-export interface UpdatePostReqType extends Partial<CreatePostReqType> {}
+export interface IUpdatePostReq extends Partial<ICreatePostReq> {}

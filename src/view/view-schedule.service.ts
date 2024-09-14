@@ -1,5 +1,4 @@
 import { Inject, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
-import { VIEW_SCHEDULE_SERVICE } from "./constants/view.constant";
 import { ViewRepository } from "./view.repository";
 import { Redis } from "ioredis";
 import { Cron, CronExpression } from "@nestjs/schedule";
@@ -7,7 +6,7 @@ import { REDIS_ALL, REDIS_LOG, REDIS_POSTS, REDIS_VIEWS } from "@_/redis/constan
 
 @Injectable()
 export class ViewScheduleService {
-    private readonly logger = new Logger(VIEW_SCHEDULE_SERVICE);
+    private readonly logger = new Logger(ViewScheduleService.name);
 
     constructor(
         private readonly viewRepository: ViewRepository,
@@ -17,7 +16,7 @@ export class ViewScheduleService {
 
     @Cron(CronExpression.EVERY_MINUTE)
     async processViewEvents(): Promise<void> {
-        this.logger.verbose('조회수 스케쥴 시작');
+        this.logger.log('조회수 스케쥴 시작');
         try {
             const allKeys = [REDIS_POSTS, REDIS_ALL, REDIS_VIEWS, REDIS_LOG].join(':');
             const viewsLogKeys = await this.redisClient.keys(allKeys);

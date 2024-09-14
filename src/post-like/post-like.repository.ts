@@ -1,13 +1,12 @@
 import { PrismaService } from "@_/prisma/prisma.service";
 import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
-import { POST_LIKE_REPOSITORY } from "./constants/post-like.constant";
-import { TogglePostLikeReqType } from "./types/toggle-post-like.req";
+import { ITogglePostLikeReq } from "./types/toggle-post-like.req.interface";
 import { INTERNAL_SERVER_ERROR_MESSAGE } from "@_/common/common.constant";
 import { PostLike } from "@prisma/client";
 
 @Injectable()
 export class PostLikeRepository {
-    private readonly logger = new Logger(POST_LIKE_REPOSITORY);
+    private readonly logger = new Logger(PostLikeRepository.name);
 
     constructor(
         private readonly prismaService: PrismaService,
@@ -39,7 +38,7 @@ export class PostLikeRepository {
         }
     }
 
-    async getPostLikeByPostAndUser(data: TogglePostLikeReqType): Promise<PostLike> {
+    async getPostLikeByPostAndUser(data: ITogglePostLikeReq): Promise<PostLike> {
         const where = {
             ...data,
             deletedAt: null,
@@ -52,7 +51,7 @@ export class PostLikeRepository {
         }
     }
 
-    async createPostLike(data: TogglePostLikeReqType): Promise<void> {
+    async createPostLike(data: ITogglePostLikeReq): Promise<void> {
         try {
             await this.prismaService.postLike.create({ data });
             return;
@@ -62,7 +61,7 @@ export class PostLikeRepository {
         }
     }
 
-    async createPostLikes(data: TogglePostLikeReqType[]): Promise<void> {
+    async createPostLikes(data: ITogglePostLikeReq[]): Promise<void> {
         try {
             await this.prismaService.postLike.createMany({ data });
             return;
@@ -91,7 +90,7 @@ export class PostLikeRepository {
         }
     }
 
-    async deletePostLikes(ids: TogglePostLikeReqType): Promise<void> {
+    async deletePostLikes(ids: ITogglePostLikeReq): Promise<void> {
         const where = {
             ...ids,
             deletedAt: null,

@@ -1,5 +1,4 @@
 import { Inject, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
-import { POST_LIKE_SCHEDULE_SERVICE } from "./constants/post-like.constant";
 import { PostLikeRepository } from "./post-like.repository";
 import { Redis } from "ioredis";
 import { Cron, CronExpression } from "@nestjs/schedule";
@@ -7,7 +6,7 @@ import { REDIS_ALL, REDIS_LIKES, REDIS_NEW, REDIS_OLD, REDIS_POSTS, REDIS_SET } 
 
 @Injectable()
 export class PostLikeScheduleService {
-    private readonly logger = new Logger(POST_LIKE_SCHEDULE_SERVICE);
+    private readonly logger = new Logger(PostLikeScheduleService.name);
 
     constructor(
         private readonly postLikeRepository: PostLikeRepository,
@@ -17,7 +16,7 @@ export class PostLikeScheduleService {
 
     @Cron(CronExpression.EVERY_MINUTE)
     async processPostLikeEvent(): Promise<void> {
-        this.logger.verbose('좋아요 스케쥴 시작');
+        this.logger.log('좋아요 스케쥴 시작');
         try {
             const allOldKeys = [REDIS_POSTS, REDIS_ALL, REDIS_LIKES, REDIS_SET, REDIS_OLD].join(':');
             const likesOldKeys = await this.redisClient.keys(allOldKeys);

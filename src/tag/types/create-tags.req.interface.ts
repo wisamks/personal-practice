@@ -1,4 +1,4 @@
-export interface CreateTagsReqType {
+export interface ICreateTagsReq {
     name: string;
     postId: number;
 }

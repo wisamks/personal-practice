@@ -1,7 +1,7 @@
 import { CommonEntity } from "@_/common/common-entity.abstract";
+import { Tag } from "@_/tag/entities/tag.entity";
 import { User } from "@_/user/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
-import { Tag } from "@_/tag/tag.entity";
 
 @Entity('post')
 export class Post extends CommonEntity {

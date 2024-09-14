@@ -1,13 +1,12 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { ViewRepository } from "./view.repository";
-import { VIEW_SERVICE } from "./constants/view.constant";
-import { CreateViewInputType } from "./types/create-view.input";
+import { ICreateViewInput } from "./types/create-view.input.interface";
 import { Redis } from "ioredis";
 import { ONE_HOUR_BY_SECOND, REDIS_COUNT, REDIS_LOG, REDIS_POSTS, REDIS_VIEWS } from "@_/redis/constants/redis.constant";
 
 @Injectable()
 export class ViewService {
-    private readonly logger = new Logger(VIEW_SERVICE);
+    private readonly logger = new Logger(ViewService.name);
 
     constructor(
         private readonly viewRepository: ViewRepository,
@@ -28,7 +27,7 @@ export class ViewService {
         return foundViewsCount;
     }
  
-    async createView({ postId, userId }: CreateViewInputType): Promise<void> {
+    async createView({ postId, userId }: ICreateViewInput): Promise<void> {
         const viewsCountKey = [REDIS_POSTS, postId, REDIS_VIEWS, REDIS_COUNT].join(':');
         const viewsLogKey = [REDIS_POSTS, postId, REDIS_VIEWS, REDIS_LOG].join(':');
 

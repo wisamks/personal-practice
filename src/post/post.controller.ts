@@ -1,8 +1,8 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, ParseIntPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostReqDto } from './dto/request/create-post.req.dto';
 import { ReqUser } from '@_/user/decorators/req-user.decorator';
-import { JwtAuthGuard } from '@_/auth/guards/auth-jwt.guard';
+import { JwtAuthGuard } from '@_/auth/guards/jwt-auth.guard';
 import { GetPostResDto } from './dto/response/get-post.res.dto';
 import { GetPostsReqDto } from './dto/request/get-posts.req.dto';
 import { CreatePostResDto } from './dto/response/create-post.res.dto';
@@ -12,6 +12,8 @@ import { PATH_POST, PATH_ROUTES } from '@_/common/common.constant';
 
 @Controller(PATH_ROUTES.POST)
 export class PostController {
+  private readonly logger = new Logger(PostController.name);
+
   constructor(private readonly postService: PostService) {}
 
   @Get(PATH_POST.CURSOR)

@@ -1,4 +1,4 @@
-export interface RefreshInputType {
+export interface IRefreshInput {
     secret: string;
     expiresIn: string;
 }

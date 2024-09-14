@@ -9,7 +9,7 @@ import { PrismaService } from '@_/prisma/prisma.service';
 import { CreatePostResDto } from './dto/response/create-post.res.dto';
 import { UpdatePostReqDto } from './dto/request/update-post.req.dto';
 import { GetCursorReqDto } from './dto/request/get-cursor.req.dto';
-import { POST_FORBIDDEN_ERROR_MESSAGE, POST_GET_COMMENT_REQ, POST_NOT_FOUND_ERROR_MESSAGE, POST_SERVICE } from './constants/post.constant';
+import { POST_FORBIDDEN_ERROR_MESSAGE, POST_GET_COMMENT_REQ, POST_NOT_FOUND_ERROR_MESSAGE } from './constants/post.constant';
 import { CommentService } from '@_/comment/comment.service';
 import { ViewService } from '@_/view/view.service';
 import { PostLikeService } from '@_/post-like/post-like.service';
@@ -19,7 +19,7 @@ import { ONE_HOUR_BY_SECOND, REDIS_COMMENTS, REDIS_COUNT, REDIS_DEFAULT_PAGE, RE
 
 @Injectable()
 export class PostService {
-    private readonly logger = new Logger(POST_SERVICE);
+    private readonly logger = new Logger(PostService.name);
 
     constructor(
         private readonly postRepository: PostRepository,

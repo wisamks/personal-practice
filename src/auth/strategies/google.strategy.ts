@@ -1,13 +1,13 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { Profile, Strategy } from "passport-google-oauth20";
-import { GOOGLE_STRATEGY, OAUTH_GOOGLE_SCOPE } from "../constants/auth.constants";
-import { OauthUserOutputType } from "../types/oauth-user.output";
+import { OAUTH_GOOGLE_SCOPE } from "../constants/auth.constants";
+import { IOauthUserOutput } from "../types/oauth-user.output.interface";
 import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
-    private readonly logger = new Logger(GOOGLE_STRATEGY);
+    private readonly logger = new Logger(GoogleStrategy.name);
 
     constructor(
         private readonly configService: ConfigService,
@@ -20,7 +20,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         })
     }
 
-    async validate(accessToken: string, refreshToken: string, profile: Profile): Promise<OauthUserOutputType> {
+    async validate(accessToken: string, refreshToken: string, profile: Profile): Promise<IOauthUserOutput> {
         const { sub, name, email, picture } = profile._json;
         return {
             provider: profile.provider,

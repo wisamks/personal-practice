@@ -6,18 +6,18 @@ import { SignUpReqDto } from "./dto/request/sign-up.req.dto";
 import { SignUpResDto } from "./dto/response/sign-up.res.dto";
 import { JwtService } from "@nestjs/jwt";
 import { SignInReqDto } from "./dto/request/sign-in.req.dto";
-import { AUTH_SERVICE, SIGN_IN_ERROR_MESSAGE } from "./constants/auth.constants";
-import { SignInOutputType } from "./types/sign-in.output";
-import { RefreshInputType } from "./types/refresh.input";
+import { SIGN_IN_ERROR_MESSAGE } from "./constants/auth.constants";
+import { ISignInOutput } from "./types/sign-in.output.interface";
+import { IRefreshInput } from "./types/refresh.input.interface";
 import { SignInResDto } from "./dto/response/sign-in.res.dto";
 import { plainToInstance } from "class-transformer";
 import { Redis } from "ioredis";
 import { ONE_WEEK_BY_SECOND, REDIS_REFRESH_TOKEN, REDIS_USERS } from "@_/redis/constants/redis.constant";
-import { OauthUserOutputType } from "./types/oauth-user.output";
+import { IOauthUserOutput } from "./types/oauth-user.output.interface";
 
 @Injectable()
 export class AuthService {
-    private readonly logger = new Logger(AUTH_SERVICE);
+    private readonly logger = new Logger(AuthService.name);
 
     constructor(
         private readonly userService: UserService,
@@ -27,7 +27,7 @@ export class AuthService {
         private readonly redisClient: Redis,
     ) {}
 
-    async validateUser(signInReqDto: SignInReqDto): Promise<SignInOutputType> {
+    async validateUser(signInReqDto: SignInReqDto): Promise<ISignInOutput> {
         const foundUser = await this.userRepository.getUserByEmail(signInReqDto.email);
         if (!foundUser) {
             throw new BadRequestException(SIGN_IN_ERROR_MESSAGE);
@@ -53,7 +53,7 @@ export class AuthService {
         return await bcrypt.compare(refreshToken, redisRefresh);
     }
 
-    async oauthLogin(user: OauthUserOutputType): Promise<SignInResDto> {
+    async oauthLogin(user: IOauthUserOutput): Promise<SignInResDto> {
         const foundUser = await this.userService.getUserOauth({
             provider: user.provider,
             providerId: user.providerId,
@@ -89,7 +89,7 @@ export class AuthService {
 
     // --- private ---
 
-    private async getTokens(payload: SignInOutputType): Promise<SignInResDto> {
+    private async getTokens(payload: ISignInOutput): Promise<SignInResDto> {
         const refreshOptions = {
             secret: process.env.JWT_REFRESH_TOKEN_SECRET,
             expiresIn: process.env.JWT_REFRESH_EXPIRE,
@@ -112,9 +112,9 @@ export class AuthService {
         return plainToInstance(SignInResDto, { accessToken, refreshToken });
     }
 
-    private async generateToken(payload: SignInOutputType): Promise<string>;
-    private async generateToken(payload: SignInOutputType, refreshOptions: RefreshInputType): Promise<string>;
-    private async generateToken(payload: SignInOutputType, refreshOptions?: RefreshInputType): Promise<string> {
+    private async generateToken(payload: ISignInOutput): Promise<string>;
+    private async generateToken(payload: ISignInOutput, refreshOptions: IRefreshInput): Promise<string>;
+    private async generateToken(payload: ISignInOutput, refreshOptions?: IRefreshInput): Promise<string> {
         try {
             if (!refreshOptions) {
                 return await this.jwtService.signAsync(payload);

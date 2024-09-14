@@ -1,6 +1,6 @@
 import { ForbiddenException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CommentRepository } from './comment.repository';
-import { COMMENT_DELETE_TAKE, COMMENT_FORBIDDEN_ERROR_MESSAGE, COMMENT_NOT_FOUND_ERROR_MESSAGE, COMMENT_SERVICE } from './constants/comment.constant';
+import { COMMENT_DELETE_TAKE, COMMENT_FORBIDDEN_ERROR_MESSAGE, COMMENT_NOT_FOUND_ERROR_MESSAGE } from './constants/comment.constant';
 import { CreateCommentReqDto } from './dto/request/create-comment.req.dto';
 import { plainToInstance } from 'class-transformer';
 import { CreateCommentResDto } from './dto/response/create-comment.res.dto';
@@ -13,7 +13,7 @@ import { Comment } from '@prisma/client';
 
 @Injectable()
 export class CommentService {
-    private readonly logger = new Logger(COMMENT_SERVICE);
+    private readonly logger = new Logger(CommentService.name);
 
     constructor(
         private readonly commentRepository: CommentRepository,

@@ -1,13 +1,12 @@
 import { PrismaService } from "@_/prisma/prisma.service";
 import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
-import { COMMENT_REPOSITORY } from "./constants/comment.constant";
 import { Comment, Prisma } from "@prisma/client";
-import { CreateCommentInputType } from "./types/create-comment.input";
-import { GetCommentsInputType } from "./types/get-comments.input";
+import { ICreateCommentInput } from "./types/create-comment.input.interface";
+import { IGetCommentsInput } from "./types/get-comments.input.interface";
 
 @Injectable()
 export class CommentRepository {
-    private readonly logger = new Logger(COMMENT_REPOSITORY);
+    private readonly logger = new Logger(CommentRepository.name);
 
     constructor(
         private readonly prismaService: PrismaService,
@@ -26,7 +25,7 @@ export class CommentRepository {
         }
     }
 
-    async getCommentsByPostId({ postId, take, cursor }: GetCommentsInputType): Promise<Comment[]> {
+    async getCommentsByPostId({ postId, take, cursor }: IGetCommentsInput): Promise<Comment[]> {
         const where = {
             postId,
             deletedAt: null,
@@ -65,7 +64,7 @@ export class CommentRepository {
         }
     }
 
-    async createComment(data: CreateCommentInputType): Promise<Pick<Comment, 'id'>> {
+    async createComment(data: ICreateCommentInput): Promise<Pick<Comment, 'id'>> {
         try {
             const createdComment = await this.prismaService.comment.create({
                 data

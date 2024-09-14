@@ -1,13 +1,12 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
-import { OauthUserOutputType, ProviderType } from "../types/oauth-user.output";
-import { NAVER_STRATEGY } from "../constants/auth.constants";
+import { IOauthUserOutput, ProviderType } from "../types/oauth-user.output.interface";
 import { Profile, Strategy } from "passport-naver-v2";
 
 @Injectable()
 export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
-    private readonly logger = new Logger(NAVER_STRATEGY);
+    private readonly logger = new Logger(NaverStrategy.name);
 
     constructor(
         private readonly configService: ConfigService,
@@ -19,7 +18,7 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
         })
     }
 
-    async validate(accessToken: string, refreshToken: string, profile: Profile): Promise<OauthUserOutputType> {
+    async validate(accessToken: string, refreshToken: string, profile: Profile): Promise<IOauthUserOutput> {
         const { id, email, profileImage, name } = profile;
         return {
             provider: profile.provider as ProviderType,

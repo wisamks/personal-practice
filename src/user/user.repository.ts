@@ -1,12 +1,11 @@
 import { PrismaService } from "@_/prisma/prisma.service";
 import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { Prisma, User } from "@prisma/client";
-import { USER_REPOSITORY } from "./constants/user.constant";
-import { ProviderOptionsType } from "./types/provider-options";
+import { IProviderOptions } from "./types/provider-options.interface";
 
 @Injectable()
 export class UserRepository {
-    private readonly logger = new Logger(USER_REPOSITORY);
+    private readonly logger = new Logger(UserRepository.name);
     
     constructor(
         private readonly prismaService: PrismaService,
@@ -56,7 +55,7 @@ export class UserRepository {
         }
     }
 
-    async getUserByProviderOptions(providerOptions: ProviderOptionsType): Promise<User> {
+    async getUserByProviderOptions(providerOptions: IProviderOptions): Promise<User> {
         const where = {
             ...providerOptions,
             deletedAt: null,

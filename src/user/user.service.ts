@@ -6,12 +6,12 @@ import { CreateUserReqDto } from './dto/request/create-user.req.dto';
 import { CreateUserResDto } from './dto/response/create-user.res.dto';
 import { UpdateUserReqDto } from './dto/request/update-user.req.dto';
 import { UserRepository } from './user.repository';
-import { USER_CONFLICT_ERROR_MESSAGE, USER_NOT_FOUND_ERROR_MESSAGE, USER_SERVICE } from './constants/user.constant';
-import { ProviderOptionsType } from './types/provider-options';
+import { USER_CONFLICT_ERROR_MESSAGE, USER_NOT_FOUND_ERROR_MESSAGE } from './constants/user.constant';
+import { IProviderOptions } from './types/provider-options.interface';
 
 @Injectable()
 export class UserService {
-    private readonly logger = new Logger(USER_SERVICE);
+    private readonly logger = new Logger(UserService.name);
 
     constructor(
         private readonly userRepository: UserRepository,
@@ -30,7 +30,7 @@ export class UserService {
         return plainToInstance(GetUserResDto, foundUser);
     }
 
-    async getUserOauth(providerOptions: ProviderOptionsType): Promise<GetUserResDto> {
+    async getUserOauth(providerOptions: IProviderOptions): Promise<GetUserResDto> {
         const foundUser = await this.userRepository.getUserByProviderOptions(providerOptions);
         return plainToInstance(GetUserResDto, foundUser);
     }

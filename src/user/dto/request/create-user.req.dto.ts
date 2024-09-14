@@ -1,4 +1,4 @@
-import { ProviderType } from "@_/auth/types/oauth-user.output";
+import { ProviderType } from "@_/auth/types/oauth-user.output.interface";
 import { IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 
 export class CreateUserReqDto {

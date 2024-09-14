@@ -1,4 +1,4 @@
-import { ProviderType } from "@_/auth/types/oauth-user.output";
+import { ProviderType } from "@_/auth/types/oauth-user.output.interface";
 import { Exclude, Expose } from "class-transformer";
 
 export class GetUserResDto {

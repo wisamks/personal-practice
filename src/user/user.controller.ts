@@ -1,15 +1,17 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserReqDto } from './dto/request/update-user.req.dto';
 import { CreateUserResDto } from './dto/response/create-user.res.dto';
 import { CreateUserReqDto } from './dto/request/create-user.req.dto';
 import { GetUserResDto } from './dto/response/get-user.res.dto';
 import { ReqUser } from './decorators/req-user.decorator';
-import { JwtAuthGuard } from '@_/auth/guards/auth-jwt.guard';
+import { JwtAuthGuard } from '@_/auth/guards/jwt-auth.guard';
 import { PATH_ROUTES, PATH_USER } from '@_/common/common.constant';
 
 @Controller(PATH_ROUTES.USER)
 export class UserController {
+  private readonly logger = new Logger(UserController.name);
+
   constructor(private readonly userService: UserService) {}
 
   @Get()

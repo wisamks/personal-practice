@@ -1,4 +1,4 @@
-export interface CreateCommentInputType {
+export interface ICreateCommentInput {
     content: string;
     authorId: number;
     postId: number;

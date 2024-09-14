@@ -1,11 +1,10 @@
 import { PrismaService } from "@_/prisma/prisma.service";
 import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
-import { CreateViewInputType } from "./types/create-view.input";
-import { VIEW_REPOSITORY } from "./constants/view.constant";
+import { ICreateViewInput } from "./types/create-view.input.interface";
 
 @Injectable()
 export class ViewRepository {
-    private readonly logger = new Logger(VIEW_REPOSITORY);
+    private readonly logger = new Logger(ViewRepository.name);
 
     constructor(
         private readonly prismaService: PrismaService,
@@ -25,7 +24,7 @@ export class ViewRepository {
         }
     }
 
-    async createView(data: CreateViewInputType): Promise<void> {
+    async createView(data: ICreateViewInput): Promise<void> {
         try {
             await this.prismaService.view.create({ data });
             return;
@@ -35,7 +34,7 @@ export class ViewRepository {
         }
     };
 
-    async createViews(data: CreateViewInputType[]): Promise<void> {
+    async createViews(data: ICreateViewInput[]): Promise<void> {
         try {
             await this.prismaService.view.createMany({ data });
         } catch(err) {

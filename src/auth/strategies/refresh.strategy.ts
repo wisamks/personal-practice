@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from "@nestjs/common";
+import { ForbiddenException, Injectable, Logger } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { Request } from "express";
@@ -8,6 +8,8 @@ import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
+    private readonly logger = new Logger(RefreshStrategy.name);
+
     constructor(
         private readonly configService: ConfigService,
         private readonly authService: AuthService,

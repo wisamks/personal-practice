@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, ParseIntPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CreateCommentReqDto } from './dto/request/create-comment.req.dto';
-import { JwtAuthGuard } from '@_/auth/guards/auth-jwt.guard';
+import { JwtAuthGuard } from '@_/auth/guards/jwt-auth.guard';
 import { ReqUser } from '@_/user/decorators/req-user.decorator';
 import { CreateCommentResDto } from './dto/response/create-comment.res.dto';
 import { GetCommentResDto } from './dto/response/get-comment.res.dto';
@@ -11,6 +11,8 @@ import { PATH_COMMENT, PATH_ROUTES } from '@_/common/common.constant';
 
 @Controller(PATH_ROUTES.COMMENT)
 export class CommentController {
+  private readonly logger = new Logger(CommentController.name);
+
   constructor(private readonly commentService: CommentService) {}
 
   @Get()

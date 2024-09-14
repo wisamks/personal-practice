@@ -1,13 +1,12 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { POST_LIKE_SERVICE } from './constants/post-like.constant';
 import { PostLikeRepository } from './post-like.repository';
-import { TogglePostLikeReqType } from './types/toggle-post-like.req';
+import { ITogglePostLikeReq } from './types/toggle-post-like.req.interface';
 import { Redis } from 'ioredis';
 import { ONE_HOUR_BY_SECOND, REDIS_COUNT, REDIS_DEFAULT_ZERO, REDIS_LIKES, REDIS_LOG, REDIS_NEW, REDIS_OLD, REDIS_POSTS, REDIS_SET } from '@_/redis/constants/redis.constant';
 
 @Injectable()
 export class PostLikeService {
-    private readonly logger = new Logger(POST_LIKE_SERVICE);
+    private readonly logger = new Logger(PostLikeService.name);
 
     constructor(
         private readonly postLikeRepository: PostLikeRepository,
@@ -28,7 +27,7 @@ export class PostLikeService {
         return likesCount;
     }
 
-    async togglePostLike({ userId, postId }: TogglePostLikeReqType): Promise<void> {
+    async togglePostLike({ userId, postId }: ITogglePostLikeReq): Promise<void> {
         const likesCountKey = [REDIS_POSTS, postId, REDIS_LIKES, REDIS_COUNT].join(':');
         const likeSetKey = [REDIS_POSTS, postId, REDIS_LIKES, REDIS_SET].join(':');
         const likeOldSetKey = [likeSetKey, REDIS_OLD].join(':');

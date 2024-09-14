@@ -1,13 +1,12 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { TagRepository } from "./tag.repository";
 import { PostTagRepository } from "./post-tag.repository";
-import { TAG_SERVICE } from "./constants/tag.constant";
 import { ONE_HOUR_BY_SECOND, REDIS_POSTS, REDIS_TAGS } from "@_/redis/constants/redis.constant";
 import { Redis } from "ioredis";
 
 @Injectable()
 export class TagService {
-    private readonly logger = new Logger(TAG_SERVICE);
+    private readonly logger = new Logger(TagService.name);
 
     constructor(
         private readonly tagRepository: TagRepository,
