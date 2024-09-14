@@ -1,4 +1,4 @@
-import { CommonEntity } from "@_/common/common-entity.abstract";
+import { CommonEntity } from "@_/common/entities/common-entity.abstract";
 import { Tag } from "@_/tag/entities/tag.entity";
 import { User } from "@_/user/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";

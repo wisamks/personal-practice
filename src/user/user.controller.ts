@@ -6,7 +6,7 @@ import { CreateUserReqDto } from './dto/request/create-user.req.dto';
 import { GetUserResDto } from './dto/response/get-user.res.dto';
 import { ReqUser } from './decorators/req-user.decorator';
 import { JwtAuthGuard } from '@_/auth/guards/jwt-auth.guard';
-import { PATH_ROUTES, PATH_USER } from '@_/common/common.constant';
+import { PATH_ROUTES, PATH_USER } from '@_/common/constants/common.constant';
 
 @Controller(PATH_ROUTES.USER)
 export class UserController {

@@ -6,7 +6,7 @@ import { SignInReqDto } from "./dto/request/sign-in.req.dto";
 import { Response } from "express";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import { AUTH_GUARD_STRATEGY, COOKIE_OPTIONS } from "./constants/auth.constants";
-import { PATH_AUTH, PATH_CLIENT, PATH_ROUTES } from "@_/common/common.constant";
+import { PATH_AUTH, PATH_CLIENT, PATH_ROUTES } from "@_/common/constants/common.constant";
 import { ReqUser } from "@_/user/decorators/req-user.decorator";
 import { RefreshAuthGuard } from "./guards/refresh-auth.guard";
 import { AuthGuard } from "@nestjs/passport";

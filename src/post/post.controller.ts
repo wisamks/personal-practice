@@ -8,7 +8,7 @@ import { GetPostsReqDto } from './dto/request/get-posts.req.dto';
 import { CreatePostResDto } from './dto/response/create-post.res.dto';
 import { UpdatePostReqDto } from './dto/request/update-post.req.dto';
 import { GetCursorReqDto } from './dto/request/get-cursor.req.dto';
-import { PATH_POST, PATH_ROUTES } from '@_/common/common.constant';
+import { PATH_POST, PATH_ROUTES } from '@_/common/constants/common.constant';
 
 @Controller(PATH_ROUTES.POST)
 export class PostController {

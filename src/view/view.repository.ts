@@ -1,6 +1,7 @@
 import { PrismaService } from "@_/prisma/prisma.service";
-import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { ICreateViewInput } from "./types/create-view.input.interface";
+import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
 
 @Injectable()
 export class ViewRepository {
@@ -20,7 +21,7 @@ export class ViewRepository {
             return viewCount
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 
@@ -30,7 +31,7 @@ export class ViewRepository {
             return;
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.message);
         }
     };
 
@@ -39,7 +40,7 @@ export class ViewRepository {
             await this.prismaService.view.createMany({ data });
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 }

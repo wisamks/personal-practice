@@ -1,7 +1,8 @@
 import { PrismaService } from "@_/prisma/prisma.service";
-import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { Prisma, User } from "@prisma/client";
 import { IProviderOptions } from "./types/provider-options.interface";
+import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
 
 @Injectable()
 export class UserRepository {
@@ -25,7 +26,7 @@ export class UserRepository {
             return foundUsers;
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.meesage);
         }
     }
 
@@ -38,7 +39,7 @@ export class UserRepository {
             return await this.prismaService.user.findUnique({ where });
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.meesage);
         }
     }
 
@@ -51,7 +52,7 @@ export class UserRepository {
             return await this.prismaService.user.findFirst({ where });
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.meesage);
         }
     }
 
@@ -64,7 +65,7 @@ export class UserRepository {
             return await this.prismaService.user.findFirst({ where });
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.meesage);
         }
     }
     
@@ -74,7 +75,7 @@ export class UserRepository {
             return { id: createdResult.id };
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.meesage);
         }
     }
 
@@ -93,7 +94,7 @@ export class UserRepository {
             });
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.meesage);
         }
     }
 
@@ -113,7 +114,7 @@ export class UserRepository {
             return;
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.meesage);
         }
     }
 
@@ -129,7 +130,7 @@ export class UserRepository {
             return;
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.meesage);
         }
     }
     
@@ -147,7 +148,7 @@ export class UserRepository {
             });
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.meesage);
         }
     }
 }

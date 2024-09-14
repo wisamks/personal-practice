@@ -1,6 +1,6 @@
-import { ForbiddenException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CommentRepository } from './comment.repository';
-import { COMMENT_DELETE_TAKE, COMMENT_FORBIDDEN_ERROR_MESSAGE, COMMENT_NOT_FOUND_ERROR_MESSAGE } from './constants/comment.constant';
+import { COMMENT_DELETE_TAKE } from './constants/comment.constant';
 import { CreateCommentReqDto } from './dto/request/create-comment.req.dto';
 import { plainToInstance } from 'class-transformer';
 import { CreateCommentResDto } from './dto/response/create-comment.res.dto';
@@ -10,6 +10,7 @@ import { UpdateCommentReqDto } from './dto/request/update-comment.req.dto';
 import { ONE_HOUR_BY_SECOND, REDIS_COMMENTS, REDIS_COUNT, REDIS_DEFAULT_PAGE, REDIS_POSTS } from '@_/redis/constants/redis.constant';
 import { Redis } from 'ioredis';
 import { Comment } from '@prisma/client';
+import { CommentForbiddenException, CommentNotFoundException } from '@_/common/custom-error.util';
 
 @Injectable()
 export class CommentService {
@@ -94,10 +95,10 @@ export class CommentService {
     }): Promise<void> {
         const foundComment = await this.commentRepository.getComment(commentId);
         if (!foundComment) {
-            throw new NotFoundException(COMMENT_NOT_FOUND_ERROR_MESSAGE);
+            throw new CommentNotFoundException();
         }
         if (foundComment.authorId !== userId) {
-            throw new ForbiddenException(COMMENT_FORBIDDEN_ERROR_MESSAGE);
+            throw new CommentForbiddenException();
         }
 
         // 레디스
@@ -116,10 +117,10 @@ export class CommentService {
     }): Promise<GetCommentResDto> {
         const foundComment = await this.commentRepository.getComment(commentId);
         if (!foundComment) {
-            throw new NotFoundException(COMMENT_NOT_FOUND_ERROR_MESSAGE);
+            throw new CommentNotFoundException();
         }
         if (foundComment.authorId !== userId) {
-            throw new ForbiddenException(COMMENT_FORBIDDEN_ERROR_MESSAGE);
+            throw new CommentForbiddenException();
         }
         const nextComment = await this.commentRepository.getCommentsByPostId({
             postId: foundComment.postId,

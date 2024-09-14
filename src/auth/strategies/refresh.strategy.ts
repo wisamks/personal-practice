@@ -1,10 +1,10 @@
-import { ForbiddenException, Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { Request } from "express";
 import { AuthService } from "../auth.service";
-import { FORBIDDEN_MESSAGE } from "@nestjs/core/guards";
 import { ConfigService } from "@nestjs/config";
+import { AuthForbiddenException } from "@_/common/custom-error.util";
 
 @Injectable()
 export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
@@ -28,7 +28,7 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
         const { refreshToken } = req?.cookies;
         const isRefreshOk = await this.authService.validateRefreshToken({ userId: payload.userId, refreshToken });
         if (!isRefreshOk) {
-            throw new ForbiddenException(FORBIDDEN_MESSAGE);
+            throw new AuthForbiddenException();
         }
         return { userId: payload.userId };
     }

@@ -1,8 +1,8 @@
 import { PrismaService } from "@_/prisma/prisma.service";
-import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { ITogglePostLikeReq } from "./types/toggle-post-like.req.interface";
-import { INTERNAL_SERVER_ERROR_MESSAGE } from "@_/common/common.constant";
 import { PostLike } from "@prisma/client";
+import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
 
 @Injectable()
 export class PostLikeRepository {
@@ -21,7 +21,7 @@ export class PostLikeRepository {
             return this.prismaService.postLike.findMany({ where });
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(INTERNAL_SERVER_ERROR_MESSAGE);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 
@@ -34,7 +34,7 @@ export class PostLikeRepository {
             return await this.prismaService.postLike.count({ where });
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(INTERNAL_SERVER_ERROR_MESSAGE);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 
@@ -47,7 +47,7 @@ export class PostLikeRepository {
             return await this.prismaService.postLike.findFirst({ where });
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(INTERNAL_SERVER_ERROR_MESSAGE);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 
@@ -57,7 +57,7 @@ export class PostLikeRepository {
             return;
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(INTERNAL_SERVER_ERROR_MESSAGE);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 
@@ -67,7 +67,7 @@ export class PostLikeRepository {
             return;
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(INTERNAL_SERVER_ERROR_MESSAGE);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 
@@ -86,7 +86,7 @@ export class PostLikeRepository {
             });
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(INTERNAL_SERVER_ERROR_MESSAGE);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 
@@ -105,7 +105,7 @@ export class PostLikeRepository {
             });
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(INTERNAL_SERVER_ERROR_MESSAGE);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 }

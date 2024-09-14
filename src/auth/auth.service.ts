@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { UserService } from "@_/user/user.service";
 import { UserRepository } from "@_/user/user.repository";
 import * as bcrypt from 'bcryptjs';
@@ -6,7 +6,6 @@ import { SignUpReqDto } from "./dto/request/sign-up.req.dto";
 import { SignUpResDto } from "./dto/response/sign-up.res.dto";
 import { JwtService } from "@nestjs/jwt";
 import { SignInReqDto } from "./dto/request/sign-in.req.dto";
-import { SIGN_IN_ERROR_MESSAGE } from "./constants/auth.constants";
 import { ISignInOutput } from "./types/sign-in.output.interface";
 import { IRefreshInput } from "./types/refresh.input.interface";
 import { SignInResDto } from "./dto/response/sign-in.res.dto";
@@ -14,6 +13,7 @@ import { plainToInstance } from "class-transformer";
 import { Redis } from "ioredis";
 import { ONE_WEEK_BY_SECOND, REDIS_REFRESH_TOKEN, REDIS_USERS } from "@_/redis/constants/redis.constant";
 import { IOauthUserOutput } from "./types/oauth-user.output.interface";
+import { AuthBadRequestException, AuthJwtException } from "@_/common/custom-error.util";
 
 @Injectable()
 export class AuthService {
@@ -30,11 +30,11 @@ export class AuthService {
     async validateUser(signInReqDto: SignInReqDto): Promise<ISignInOutput> {
         const foundUser = await this.userRepository.getUserByEmail(signInReqDto.email);
         if (!foundUser) {
-            throw new BadRequestException(SIGN_IN_ERROR_MESSAGE);
+            throw new AuthBadRequestException();
         }
         const checkPassword = await bcrypt.compare(signInReqDto.password, foundUser.password);
         if (!checkPassword) {
-            throw new BadRequestException(SIGN_IN_ERROR_MESSAGE);
+            throw new AuthBadRequestException();
         }
         return { userId: foundUser.id };
     }
@@ -122,7 +122,7 @@ export class AuthService {
             return await this.jwtService.signAsync(payload, refreshOptions);
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new AuthJwtException(err.message);
         }
     }
 }

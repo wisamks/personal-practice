@@ -7,7 +7,7 @@ import { CreateCommentResDto } from './dto/response/create-comment.res.dto';
 import { GetCommentResDto } from './dto/response/get-comment.res.dto';
 import { GetCommentsReqDto } from './dto/request/get-comments.req.dto';
 import { UpdateCommentReqDto } from './dto/request/update-comment.req.dto';
-import { PATH_COMMENT, PATH_ROUTES } from '@_/common/common.constant';
+import { PATH_COMMENT, PATH_ROUTES } from '@_/common/constants/common.constant';
 
 @Controller(PATH_ROUTES.COMMENT)
 export class CommentController {

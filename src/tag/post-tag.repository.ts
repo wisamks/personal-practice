@@ -1,5 +1,6 @@
+import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
 import { PrismaService } from "@_/prisma/prisma.service";
-import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { PostTag } from "@prisma/client";
 
 @Injectable()
@@ -23,7 +24,7 @@ export class PostTagRepository {
             return;
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 
@@ -36,7 +37,7 @@ export class PostTagRepository {
             return;
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 }

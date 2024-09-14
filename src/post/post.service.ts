@@ -1,4 +1,4 @@
-import { ForbiddenException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { PostRepository } from './post.repository';
 import { CreatePostReqDto } from './dto/request/create-post.req.dto';
 import { TagService } from '@_/tag/tag.service';
@@ -9,13 +9,14 @@ import { PrismaService } from '@_/prisma/prisma.service';
 import { CreatePostResDto } from './dto/response/create-post.res.dto';
 import { UpdatePostReqDto } from './dto/request/update-post.req.dto';
 import { GetCursorReqDto } from './dto/request/get-cursor.req.dto';
-import { POST_FORBIDDEN_ERROR_MESSAGE, POST_GET_COMMENT_REQ, POST_NOT_FOUND_ERROR_MESSAGE } from './constants/post.constant';
+import { POST_GET_COMMENT_REQ } from './constants/post.constant';
 import { CommentService } from '@_/comment/comment.service';
 import { ViewService } from '@_/view/view.service';
 import { PostLikeService } from '@_/post-like/post-like.service';
 import { Redis } from 'ioredis';
 import { Post } from '@prisma/client';
 import { ONE_HOUR_BY_SECOND, REDIS_COMMENTS, REDIS_COUNT, REDIS_DEFAULT_PAGE, REDIS_LIKES, REDIS_POSTS, REDIS_TAGS, REDIS_VIEWS } from '@_/redis/constants/redis.constant';
+import { PostForbiddenException, PostNotFoundException } from '@_/common/custom-error.util';
 
 @Injectable()
 export class PostService {
@@ -102,7 +103,7 @@ export class PostService {
         } else {
             const dbPost = await this.postRepository.getPost(postId);
             if (!dbPost) {
-                throw new NotFoundException(POST_NOT_FOUND_ERROR_MESSAGE);
+                throw new PostNotFoundException();
             }
             await this.redisClient.set(postKey, JSON.stringify(dbPost), 'EX', ONE_HOUR_BY_SECOND);
             foundPost = dbPost;
@@ -174,10 +175,10 @@ export class PostService {
         const { title, content, tags } = updatePostReqDto;
         const foundPost = await this.postRepository.getPost(postId);
         if (!foundPost) {
-            throw new NotFoundException(POST_NOT_FOUND_ERROR_MESSAGE);
+            throw new PostNotFoundException();
         }
         if (foundPost.authorId !== userId) {
-            throw new ForbiddenException(POST_FORBIDDEN_ERROR_MESSAGE);
+            throw new PostForbiddenException();
         }
 
         return await this.prismaService.$transaction( async tx => { 
@@ -207,10 +208,10 @@ export class PostService {
 
         const foundPost = await this.postRepository.getPost(postId);
         if (!foundPost) {
-            throw new NotFoundException(POST_NOT_FOUND_ERROR_MESSAGE);
+            throw new PostNotFoundException();
         }
         if (foundPost.authorId !== userId) {
-            throw new ForbiddenException(POST_FORBIDDEN_ERROR_MESSAGE);
+            throw new PostForbiddenException();
         }
         
         return await this.prismaService.$transaction( async tx => {

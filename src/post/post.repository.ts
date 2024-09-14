@@ -1,10 +1,11 @@
 import { PrismaService } from "@_/prisma/prisma.service";
-import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { GetPostsReqDto } from "./dto/request/get-posts.req.dto";
 import { Post } from "@prisma/client";
 import { ICreatePostReq } from "./types/create-post.req.interface";
 import { IUpdatePostReq } from "./types/update-post.req";
 import { GetCursorReqDto } from "./dto/request/get-cursor.req.dto";
+import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
 
 @Injectable()
 export class PostRepository {
@@ -30,7 +31,7 @@ export class PostRepository {
             });
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 
@@ -52,7 +53,7 @@ export class PostRepository {
             });
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 
@@ -70,7 +71,7 @@ export class PostRepository {
             });
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 
@@ -80,7 +81,7 @@ export class PostRepository {
             return { id: createdResult.id };
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 
@@ -100,7 +101,7 @@ export class PostRepository {
             return;
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 
@@ -118,7 +119,7 @@ export class PostRepository {
             });
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 }

@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
-import { PATH_API } from './common/common.constant';
+import { PATH_API } from './common/constants/common.constant';
 import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {

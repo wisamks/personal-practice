@@ -1,8 +1,9 @@
-import { Inject, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { ViewRepository } from "./view.repository";
 import { Redis } from "ioredis";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { REDIS_ALL, REDIS_LOG, REDIS_POSTS, REDIS_VIEWS } from "@_/redis/constants/redis.constant";
+import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
 
 @Injectable()
 export class ViewScheduleService {
@@ -43,7 +44,7 @@ export class ViewScheduleService {
             }
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 }

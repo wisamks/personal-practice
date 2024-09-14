@@ -1,8 +1,9 @@
 import { PrismaService } from "@_/prisma/prisma.service";
-import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { Comment, Prisma } from "@prisma/client";
 import { ICreateCommentInput } from "./types/create-comment.input.interface";
 import { IGetCommentsInput } from "./types/get-comments.input.interface";
+import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
 
 @Injectable()
 export class CommentRepository {
@@ -21,7 +22,7 @@ export class CommentRepository {
             return await this.prismaService.comment.count({ where });
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 
@@ -47,7 +48,7 @@ export class CommentRepository {
             });
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 
@@ -60,7 +61,7 @@ export class CommentRepository {
             return await this.prismaService.comment.findUnique({ where });
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 
@@ -72,7 +73,7 @@ export class CommentRepository {
             return { id: createdComment.id };
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 
@@ -92,7 +93,7 @@ export class CommentRepository {
             return;
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 
@@ -111,7 +112,7 @@ export class CommentRepository {
             });
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 }

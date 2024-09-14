@@ -1,4 +1,4 @@
-import { CommonEntity } from "@_/common/common-entity.abstract";
+import { CommonEntity } from "@_/common/entities/common-entity.abstract";
 import { Post } from "@_/post/entities/post.entity";
 import { Column, Entity, OneToMany } from "typeorm";
 

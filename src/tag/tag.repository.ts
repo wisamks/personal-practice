@@ -1,5 +1,6 @@
+import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
 import { PrismaService } from "@_/prisma/prisma.service";
-import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { Tag } from "@prisma/client";
 
 @Injectable()
@@ -19,7 +20,7 @@ export class TagRepository {
             return this.prismaService.tag.findUnique({ where });
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 
@@ -32,7 +33,7 @@ export class TagRepository {
             return await tx.tag.findFirst({ where });
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 
@@ -41,7 +42,7 @@ export class TagRepository {
             return await tx.tag.create({ data: { name }});
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 }

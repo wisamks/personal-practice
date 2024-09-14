@@ -4,6 +4,7 @@ import { Profile, Strategy } from "passport-google-oauth20";
 import { OAUTH_GOOGLE_SCOPE } from "../constants/auth.constants";
 import { IOauthUserOutput } from "../types/oauth-user.output.interface";
 import { ConfigService } from "@nestjs/config";
+import { AuthServiceUnavailableException } from "@_/common/custom-error.util";
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -22,11 +23,14 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 
     async validate(accessToken: string, refreshToken: string, profile: Profile): Promise<IOauthUserOutput> {
         const { sub, name, email, picture } = profile._json;
-        return {
-            provider: profile.provider,
-            providerId: sub,
-            name,
-            email,
-        };
+        if (sub && name && email && picture) {
+            return {
+                provider: profile.provider,
+                providerId: sub,
+                name,
+                email,
+            };
+        }
+        throw new AuthServiceUnavailableException();
     }
 }

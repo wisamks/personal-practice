@@ -2,7 +2,7 @@ import { Controller, HttpCode, HttpStatus, Logger, Param, ParseIntPipe, Post, Us
 import { PostLikeService } from './post-like.service';
 import { JwtAuthGuard } from '@_/auth/guards/jwt-auth.guard';
 import { ReqUser } from '@_/user/decorators/req-user.decorator';
-import { PATH_ROUTES } from '@_/common/common.constant';
+import { PATH_ROUTES } from '@_/common/constants/common.constant';
 
 @Controller(PATH_ROUTES.POST_LIKE)
 export class PostLikeController {

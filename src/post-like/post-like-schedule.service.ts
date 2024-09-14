@@ -1,8 +1,9 @@
-import { Inject, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { PostLikeRepository } from "./post-like.repository";
 import { Redis } from "ioredis";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { REDIS_ALL, REDIS_LIKES, REDIS_NEW, REDIS_OLD, REDIS_POSTS, REDIS_SET } from "@_/redis/constants/redis.constant";
+import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
 
 @Injectable()
 export class PostLikeScheduleService {
@@ -39,7 +40,7 @@ export class PostLikeScheduleService {
             }
         } catch(err) {
             this.logger.error(err);
-            throw new InternalServerErrorException(err.message);
+            throw new RepositoryBadGatewayException(err.message);
         }
     }
 }

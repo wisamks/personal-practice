@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import { IOauthUserOutput, ProviderType } from "../types/oauth-user.output.interface";
 import { Profile, Strategy } from "passport-naver-v2";
+import { AuthServiceUnavailableException } from "@_/common/custom-error.util";
 
 @Injectable()
 export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
@@ -20,11 +21,14 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
 
     async validate(accessToken: string, refreshToken: string, profile: Profile): Promise<IOauthUserOutput> {
         const { id, email, profileImage, name } = profile;
-        return {
-            provider: profile.provider as ProviderType,
-            providerId: id,
-            email,
-            name,
+        if (id && email && profileImage && name) {
+            return {
+                provider: profile.provider as ProviderType || 'naver',
+                providerId: id,
+                email,
+                name,
+            }
         }
+        throw new AuthServiceUnavailableException();
     }
 }
