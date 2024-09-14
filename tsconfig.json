@@ -25,7 +25,11 @@
       "@_post/*": ["./src/post/*"],
       "@_common/*": ["./src/common/*"],
       "@_tag/*": ["./src/tag/*"],
-      "@_prisma/*": ["./src/prisma/*"]
+      "@_prisma/*": ["./src/prisma/*"],
+      "@_view/*": ["./src/view/*"],
+      "@_redis/*": ["./src/redis/*"],
+      "@_comment/*": ["./src/comment/*"],
+      "@_logger/*": ["./src/logger/*"]
     }
   }
 }

@@ -14,6 +14,7 @@ import { Redis } from "ioredis";
 import { ONE_WEEK_BY_SECOND, REDIS_REFRESH_TOKEN, REDIS_USERS } from "@_/redis/constants/redis.constant";
 import { IOauthUserOutput } from "./types/oauth-user.output.interface";
 import { AuthBadRequestException, AuthJwtException } from "@_/common/custom-error.util";
+import { AUTH_LOG_MESSAGE } from "./constants/auth.constants";
 
 @Injectable()
 export class AuthService {
@@ -63,19 +64,25 @@ export class AuthService {
                 ...user,
                 password: user.provider,
             });
-            return this.getTokens({ userId: createdUser.userId });
+            const tokens = this.getTokens({ userId: createdUser.userId });
+            this.logger.log(AUTH_LOG_MESSAGE.LOGIN, createdUser.userId);
         }
-        return this.getTokens({ userId: foundUser.userId });
+        const tokens = this.getTokens({ userId: foundUser.userId });
+        this.logger.log(AUTH_LOG_MESSAGE.LOGIN, foundUser.userId);
+        return tokens;
     }
 
     async signIn(signInReqDto: SignInReqDto): Promise<SignInResDto> {
         const payload = await this.validateUser(signInReqDto);
         
-        return this.getTokens(payload);
+        const tokens = this.getTokens(payload);
+        this.logger.log(AUTH_LOG_MESSAGE.LOGIN, payload.userId);
+        return tokens;
     }
 
     async signOut(userId: number): Promise<void> {
         await this.userService.deleteRefresh(userId);
+        this.logger.log(AUTH_LOG_MESSAGE.LOGOUT + userId);
         return;
     }
 

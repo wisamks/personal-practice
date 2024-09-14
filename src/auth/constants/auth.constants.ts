@@ -23,3 +23,8 @@ export const AUTH_GUARD_STRATEGY = {
     NAVER: 'naver',
     KAKAO: 'kakao',
 };
+
+export const AUTH_LOG_MESSAGE = {
+    LOGIN: '접속했습니다. 유저 아이디: ',
+    LOGOUT: '종료했습니다. 유저 아이디: ',
+}

@@ -141,3 +141,12 @@ model Comment {
 
   @@map("comment")
 }
+
+model Log {
+  id  Int @default(autoincrement()) @id @db.UnsignedInt
+  level String
+  message String
+  createdAt DateTime  @default(now()) @map("created_at")  @db.Timestamp(3) 
+
+  @@map("log")
+}

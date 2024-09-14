@@ -52,7 +52,7 @@ export class UserRepository {
             return await this.prismaService.user.findFirst({ where });
         } catch(err) {
             this.logger.error(err);
-            throw new RepositoryBadGatewayException(err.meesage);
+            throw new RepositoryBadGatewayException(err);
         }
     }
 

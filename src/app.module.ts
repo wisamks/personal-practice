@@ -10,6 +10,7 @@ import { PostLikeModule } from './post-like/post-like.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { LoggerModule } from './logger/logger.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     PostLikeModule,
     PrismaModule,
     RedisModule,
+    LoggerModule
   ],
   controllers: [AppController],
   providers: [

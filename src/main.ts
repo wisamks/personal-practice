@@ -4,11 +4,17 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { PATH_API } from './common/constants/common.constant';
 import { ConfigService } from '@nestjs/config';
+import { AllExceptionFilter } from './common/filters/all-exception.filter';
+import { WinstonLoggerService } from './logger/logger.service';
 
 async function bootstrap() {
   
-  const app = await NestFactory.create(AppModule);
-  const configService = app.get(ConfigService)
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+  });
+  app.useLogger(app.get(WinstonLoggerService));
+  app.useGlobalFilters(new AllExceptionFilter());
+  const configService = app.get(ConfigService);
   
   const PORT = configService.get<number>('SERVER_PORT');
   app.enableCors({
