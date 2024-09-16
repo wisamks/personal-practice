@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PostLikeController } from './post-like.controller';
-import { PostLikeService } from './post-like.service';
+import { PostLikeController } from '../post-like.controller';
+import { PostLikeService } from '../post-like.service';
 
 describe('PostLikeController', () => {
   let controller: PostLikeController;
