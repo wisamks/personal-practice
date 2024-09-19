@@ -18,8 +18,8 @@ export class CreateUserReqDto {
     readonly name: string;
 
     @IsOptional()
-    readonly provider: ProviderType;
+    readonly provider?: ProviderType;
 
     @IsOptional()
-    readonly providerId: string;
+    readonly providerId?: string;
 }
