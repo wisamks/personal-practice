@@ -45,7 +45,7 @@ export class PostService {
             ] = await Promise.all([
                 this.tagService.getTagsByPostId(foundPost.id),
                 this.commentService.getCommentsCountByPostId(foundPost.id),
-                this.postLikeService.getPostLikesCountByPostId(foundPost.id),
+                this.postLikeService.getPostLikeCountByPostId(foundPost.id),
                 this.viewService.getViewCountByPostId(foundPost.id),
             ]);
             result.push(plainToInstance(GetPostResDto, { 
@@ -73,7 +73,7 @@ export class PostService {
             ] = await Promise.all([
                 this.tagService.getTagsByPostId(foundPost.id),
                 this.commentService.getCommentsCountByPostId(foundPost.id),
-                this.postLikeService.getPostLikesCountByPostId(foundPost.id),
+                this.postLikeService.getPostLikeCountByPostId(foundPost.id),
                 this.viewService.getViewCountByPostId(foundPost.id),
             ]);
             result.push(plainToInstance(GetPostResDto, { 
@@ -122,7 +122,7 @@ export class PostService {
                 postId,
             }),
             this.commentService.getCommentsCountByPostId(postId),
-            this.postLikeService.getPostLikesCountByPostId(postId),
+            this.postLikeService.getPostLikeCountByPostId(postId),
             this.viewService.getViewCountByPostId(postId)
         ]);
         

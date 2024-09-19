@@ -33,7 +33,7 @@ export class PostLikeService {
         const likeOldSetKey = [likeSetKey, REDIS_OLD].join(':');
         const likeNewSetKey = [likeSetKey, REDIS_NEW].join(':');
         const redisLikeOldSet = await this.redisClient.smembers(likeOldSetKey);
-        if (!redisLikeOldSet) {
+        if (redisLikeOldSet.length === 0) {
             const dbLikes = await this.postLikeRepository.getPostLikesByPostId(postId);
             const likeUsers = dbLikes.map(dbLike => dbLike.userId);
             likeUsers.push(REDIS_DEFAULT_ZERO);

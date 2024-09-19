@@ -21,11 +21,11 @@ export class ViewScheduleService {
         try {
             const allKeys = [REDIS_POSTS, REDIS_ALL, REDIS_VIEWS, REDIS_LOG].join(':');
             const viewsLogKeys = await this.redisClient.keys(allKeys);
+            const viewsLogs = [];
             let count = 0;
 
             for (const viewsLogKey of viewsLogKeys) {
                 const postId = Number(viewsLogKey.split(':')[1]);
-                const viewsLogs = [];
                 while (true) {
                     const viewLog = await this.redisClient.lpop(viewsLogKey);
                     if (!viewLog) {
@@ -39,10 +39,10 @@ export class ViewScheduleService {
                         createdAt: new Date(createdAt),
                     });
                 }
-
+            }
+            if (viewsLogs.length !== 0) {
                 const createdResult = await this.viewRepository.createViews(viewsLogs);
                 count += createdResult.count;
-                return;
             }
             this.logger.log(`조회수 스케쥴 작업 성공: ${count}개 ${Date.now() - now}ms`);
             return;

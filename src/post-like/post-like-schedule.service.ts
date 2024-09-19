@@ -23,6 +23,8 @@ export class PostLikeScheduleService {
             const likesOldKeys = await this.redisClient.keys(allOldKeys);
             let count = 0;
 
+            const allCreateArray = [];
+
             for (const likesOldKey of likesOldKeys) {
                 const postId = Number(likesOldKey.split(':')[1]);
                 const likesNewKey = [REDIS_POSTS, postId, REDIS_LIKES, REDIS_SET, REDIS_NEW].join(':');
@@ -31,17 +33,22 @@ export class PostLikeScheduleService {
                     this.redisClient.sdiff(likesNewKey, likesOldKey),
                     this.redisClient.sinter(likesNewKey, likesOldKey),
                 ]);
-                const createArray = createSet.map(userId => ({ postId, userId: Number(userId) }));
+                createSet.forEach(userId => {
+                    allCreateArray.push({ postId, userId: Number(userId) });
+                })
                 const userIds = deleteSet.map(Number);
                 
-                const [deletedResult, createdResult] = await Promise.all([
+                const [deletedResult] = await Promise.all([
                     this.postLikeRepository.deletePostLikes({ postId, userIds }),
-                    this.postLikeRepository.createPostLikes(createArray),
                     this.redisClient.del(likesOldKey),
                     this.redisClient.del(likesNewKey),
                 ]);
-                count += deletedResult.count + createdResult.count;
+                count += deletedResult.count;
             }
+            if (allCreateArray.length !== 0) {
+                const createdResult = await this.postLikeRepository.createPostLikes(allCreateArray);
+                count += createdResult.count;
+            }            
 
             this.logger.log(`좋아요 스케쥴 성공: ${count}개 ${Date.now() - now}ms`);
             return;
