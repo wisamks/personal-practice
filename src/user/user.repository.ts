@@ -12,7 +12,7 @@ export class UserRepository {
         private readonly prismaService: PrismaService,
     ) {}
 
-    async getUsers(): Promise<User[]> {
+    async findUsers(): Promise<User[]> {
         const where = {
             deletedAt: null,
         };
@@ -30,7 +30,7 @@ export class UserRepository {
         }
     }
 
-    async getUserById(userId: number): Promise<User> {
+    async findUserById(userId: number): Promise<User> {
         const where = {
             id: userId,
             deletedAt: null,
@@ -43,7 +43,7 @@ export class UserRepository {
         }
     }
 
-    async getUserByEmail(email: string): Promise<User> {
+    async findUserByEmail(email: string): Promise<User> {
         const where = {
             email,
             deletedAt: null,
@@ -56,7 +56,7 @@ export class UserRepository {
         }
     }
 
-    async getUserByProviderOptions(providerOptions: IProviderOptions): Promise<User> {
+    async findUserByProviderOptions(providerOptions: IProviderOptions): Promise<User> {
         const where = {
             ...providerOptions,
             deletedAt: null,

@@ -18,12 +18,12 @@ export class UserService {
     ) {}
 
     async getUsers(): Promise<GetUserResDto[]> {
-        const foundUsers = await this.userRepository.getUsers();
+        const foundUsers = await this.userRepository.findUsers();
         return foundUsers.map(foundUser => plainToInstance(GetUserResDto, foundUser));
     }
 
     async getUser(userId: number): Promise<GetUserResDto> {
-        const foundUser = await this.userRepository.getUserById(userId);
+        const foundUser = await this.userRepository.findUserById(userId);
         if (!foundUser) {
             throw new UserNotFoundException();
         }
@@ -31,23 +31,26 @@ export class UserService {
     }
 
     async getUserOauth(providerOptions: IProviderOptions): Promise<GetUserResDto> {
-        const foundUser = await this.userRepository.getUserByProviderOptions(providerOptions);
+        const foundUser = await this.userRepository.findUserByProviderOptions(providerOptions);
         return plainToInstance(GetUserResDto, foundUser);
     }
 
     async getRefreshToken(userId: number): Promise<string> {
-        const foundUser = await this.userRepository.getUserById(userId);
+        const foundUser = await this.userRepository.findUserById(userId);
         return foundUser.refreshToken;
     }
 
     async createUser(createUserReqDto: CreateUserReqDto): Promise<CreateUserResDto> {
-        const foundUser = await this.userRepository.getUserByEmail(createUserReqDto.email);
+        const foundUser = await this.userRepository.findUserByEmail(createUserReqDto.email);
         if (foundUser) {
             throw new UserConflictEmailException();
         }
         const hashedPassword = await bcrypt.hash(createUserReqDto.password, 10);
-        createUserReqDto.password = hashedPassword;
-        const createdUser = await this.userRepository.createUser(createUserReqDto);
+        const createUserInputData = {
+            ...createUserReqDto,
+            password: hashedPassword,
+        };
+        const createdUser = await this.userRepository.createUser(createUserInputData);
         return plainToInstance(CreateUserResDto, createdUser);
     }
 
@@ -58,11 +61,11 @@ export class UserService {
         updateUserReqDto: UpdateUserReqDto;
         userId: number; 
     }): Promise<void> {
-        const foundUser = await this.userRepository.getUserById(userId);
+        const foundUser = await this.userRepository.findUserById(userId);
         if (!foundUser) {
             throw new UserNotFoundException();
         }
-        const foundEmail = await this.userRepository.getUserByEmail(updateUserReqDto.email);
+        const foundEmail = await this.userRepository.findUserByEmail(updateUserReqDto.email);
         if (foundEmail && foundEmail.id !== userId) {
             throw new UserConflictEmailException();
         }
@@ -70,7 +73,7 @@ export class UserService {
     }
 
     async deleteUser(userId: number): Promise<void> {
-        const foundUser = await this.userRepository.getUserById(userId);
+        const foundUser = await this.userRepository.findUserById(userId);
         if (!foundUser) {
             throw new UserNotFoundException();
         }

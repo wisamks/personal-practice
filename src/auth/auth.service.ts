@@ -29,7 +29,7 @@ export class AuthService {
     ) {}
 
     async validateUser(signInReqDto: SignInReqDto): Promise<ISignInOutput> {
-        const foundUser = await this.userRepository.getUserByEmail(signInReqDto.email);
+        const foundUser = await this.userRepository.findUserByEmail(signInReqDto.email);
         if (!foundUser) {
             throw new AuthBadRequestException();
         }

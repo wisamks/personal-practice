@@ -18,18 +18,7 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@_/*": ["./src/*"],
-      "@_config/*": ["./src/config/*"],
-      "@_auth/*": ["./src/auth/*"],
-      "@_user/*": ["./src/user/*"],
-      "@_post/*": ["./src/post/*"],
-      "@_common/*": ["./src/common/*"],
-      "@_tag/*": ["./src/tag/*"],
-      "@_prisma/*": ["./src/prisma/*"],
-      "@_view/*": ["./src/view/*"],
-      "@_redis/*": ["./src/redis/*"],
-      "@_comment/*": ["./src/comment/*"],
-      "@_logger/*": ["./src/logger/*"]
+      "@_/*": ["./src/*"]
     }
   }
 }
