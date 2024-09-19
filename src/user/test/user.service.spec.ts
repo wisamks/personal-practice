@@ -5,11 +5,11 @@ import { User } from "@prisma/client";
 import { PrismaService } from "@_/prisma/prisma.service";
 import { plainToInstance } from "class-transformer";
 import { GetUserResDto } from "../dto/response/get-user.res.dto";
-import { UserNotFoundException } from "@_/common/custom-error.util";
+import { UserConflictEmailException, UserNotFoundException } from "@_/common/custom-error.util";
 import { IProviderOptions } from "../types/provider-options.interface";
 import * as bcrypt from 'bcryptjs';
 import { CreateUserReqDto } from "../dto/request/create-user.req.dto";
-import { CreateUserResDto } from "../dto/response/create-user.res.dto";
+import { UpdateUserReqDto } from "../dto/request/update-user.req.dto";
 
 describe('UserService', () => {
   let service: UserService;
@@ -173,5 +173,126 @@ describe('UserService', () => {
       });
     });
     
+    it('throw ConflictError if conflict email', async () => {
+      const hashedPassword = await bcrypt.hash(mockUser1.password, 10);
+      const user = {
+        ...mockUser1,
+        password: hashedPassword,
+      };
+      const createUserReqDto: CreateUserReqDto = {
+        email: 'mock1@mock.com',
+        password: '1234',
+        name: '모의유저1',
+        provider: 'google',
+        providerId: '1029385618932',
+      };
+      repository.findUserByEmail.mockResolvedValue({
+        ...mockUser2,
+        email: mockUser1.email,
+      });
+
+      await expect(service.createUser(createUserReqDto)).rejects.toThrow(UserConflictEmailException);
+      expect(repository.findUserByEmail).toHaveBeenCalledWith(createUserReqDto.email);
+    });
+  });
+
+  describe('updateUser', () => {
+    it('return void', async () => {
+      const userId = 1;
+      const updateUserReqDto: UpdateUserReqDto = {
+        name: '몰랑이',
+      };
+      repository.findUserByEmail.mockResolvedValue(null);
+      repository.updateUser.mockResolvedValue({ count: 1 });
+
+      await expect(service.updateUser({ updateUserReqDto, userId })).resolves.toEqual(undefined);
+      expect(repository.updateUser).toHaveBeenCalledWith({ updateUserReqDto, userId });
+    });
+
+    it('throw ConflictError if found Email', async () => {
+      const userId = 1;
+      const updateUserReqDto: UpdateUserReqDto = {
+        email: mockUser2.email,
+      };
+      repository.findUserByEmail.mockResolvedValue(mockUser2);
+
+      await expect(service.updateUser({ updateUserReqDto, userId })).rejects.toThrow(UserConflictEmailException);
+      expect(repository.findUserByEmail).toHaveBeenCalledWith(updateUserReqDto.email);
+    });
+
+    it('throw NotFoundError if not found', async () => {
+      const userId = 99;
+      const updateUserReqDto: UpdateUserReqDto = {
+        name: '몰랑이',
+      };
+      repository.updateUser.mockResolvedValue({ count: 0 });
+      repository.findUserById.mockResolvedValue(null);
+
+      await expect(service.updateUser({ updateUserReqDto, userId })).rejects.toThrow(UserNotFoundException);
+      expect(repository.updateUser).toHaveBeenCalledWith({ updateUserReqDto, userId });
+      expect(repository.findUserById).toHaveBeenCalledWith(userId);
+    });
+  });
+
+  describe('deleteUser', () => {
+    it('return void', async () => {
+      const userId = 1;
+      repository.deleteUser.mockResolvedValue({ count: 1 });
+
+      await expect(service.deleteUser(userId)).resolves.toEqual(undefined);
+      expect(repository.deleteUser).toHaveBeenCalledWith(userId);
+    });
+
+    it('throw NotFoundError if not found', async () => {
+      const userId = 99;
+      repository.deleteUser.mockResolvedValue({ count: 0 });
+      repository.findUserById.mockResolvedValue(null);
+
+      await expect(service.deleteUser(userId)).rejects.toThrow(UserNotFoundException);
+      expect(repository.deleteUser).toHaveBeenCalledWith(userId);
+      expect(repository.findUserById).toHaveBeenCalledWith(userId);
+    });
+  });
+
+  describe('createRefresh', () => {
+    it('return void', async () => {
+      const userId = 1;
+      const refreshToken = 'asdgqjefasdahkdjqwejf';
+      repository.updateUserCreateRefresh.mockResolvedValue({ count: 1 });
+
+      await expect(service.createRefresh({ userId, refreshToken })).resolves.toEqual(undefined);
+      expect(repository.updateUserCreateRefresh).toHaveBeenCalledWith({ userId, refreshToken });
+    });
+
+    it('throw NotFoundError if not found', async () => {
+      const userId = 99;
+      const refreshToken = 'as;dlgahsfjqowief;askdg';
+      repository.updateUserCreateRefresh.mockResolvedValue({ count: 0 });
+      repository.findUserById.mockResolvedValue(null);
+
+      await expect(service.createRefresh({ userId, refreshToken })).rejects.toThrow(UserNotFoundException);
+      expect(repository.updateUserCreateRefresh).toHaveBeenCalledWith({ userId, refreshToken });
+      expect(repository.findUserById).toHaveBeenCalledWith(userId);
+    });
+  });
+
+  describe('deleteRefresh', () => {
+    it('return void', async () => {
+      const userId = 1;
+      repository.updateUserDeleteRefresh.mockResolvedValue({ count: 1 });
+
+      await expect(service.deleteRefresh(userId)).resolves.toEqual(undefined);
+      expect(repository.updateUserDeleteRefresh).toHaveBeenCalledWith(userId);
+    })
+
+    it('throw NotFoundError if not found', async () => {
+      const userId = 99;
+      repository.updateUserDeleteRefresh.mockResolvedValue({ count: 0 });
+      repository.findUserById.mockResolvedValue(null);
+
+      await expect(service.deleteRefresh(userId)).rejects.toThrow(UserNotFoundException);
+      expect(repository.updateUserDeleteRefresh).toHaveBeenCalledWith(userId);
+      expect(repository.findUserById).toHaveBeenCalledWith(userId);
+    });
   });
 })

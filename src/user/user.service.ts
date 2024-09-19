@@ -61,10 +61,13 @@ export class UserService {
         updateUserReqDto: UpdateUserReqDto;
         userId: number; 
     }): Promise<void> {
-        const foundEmail = await this.userRepository.findUserByEmail(updateUserReqDto.email);
-        if (foundEmail?.id !== userId) {
-            throw new UserConflictEmailException();
+        if (updateUserReqDto?.email) {
+            const foundEmail = await this.userRepository.findUserByEmail(updateUserReqDto?.email);
+            if (foundEmail && foundEmail.id !== userId) {
+                throw new UserConflictEmailException();
+            }
         }
+        
         const updatedResult = await this.userRepository.updateUser({ updateUserReqDto, userId });
         if (updatedResult.count) {
             return;
@@ -92,13 +95,27 @@ export class UserService {
         userId: number;
         refreshToken: string;
     }): Promise<void> {
-        await this.userRepository.updateUserCreateRefresh(data);
-        return;
+        const updatedResult = await this.userRepository.updateUserCreateRefresh(data);
+        if (updatedResult.count) {
+            return;
+        }
+        const foundUser = await this.userRepository.findUserById(data.userId);
+        if (!foundUser) {
+            throw new UserNotFoundException();
+        }
+        throw new UserInternalServerErrorException();
     }
 
     async deleteRefresh(userId: number): Promise<void> {
-        await this.userRepository.updateUserDeleteRefresh(userId);
-        return;
+        const deletedResult = await this.userRepository.updateUserDeleteRefresh(userId);
+        if (deletedResult.count) {
+            return;
+        }
+        const foundUser = await this.userRepository.findUserById(userId);
+        if (!foundUser) {
+            throw new UserNotFoundException();
+        }
+        throw new UserInternalServerErrorException();
     } 
 }
 

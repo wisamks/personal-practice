@@ -102,7 +102,7 @@ export class UserRepository {
     async updateUserCreateRefresh({ userId, refreshToken }: {
         userId: number,
         refreshToken: string,
-    }): Promise<void> {
+    }): Promise<Prisma.BatchPayload> {
         const where = {
             id: userId,
             deletedAt: null,
@@ -111,24 +111,24 @@ export class UserRepository {
             refreshToken
         };
         try {
-            await this.prismaService.user.update({ where, data });
-            return;
+            const updatedResult = await this.prismaService.user.updateMany({ where, data });
+            return updatedResult;
         } catch(err) {
             this.logger.error(err);
             throw new RepositoryBadGatewayException(err.meesage);
         }
     }
 
-    async updateUserDeleteRefresh(userId: number): Promise<void> {
+    async updateUserDeleteRefresh(userId: number): Promise<Prisma.BatchPayload> {
         const where = {
             id: userId,
             deletedAt: null,
         };
         try {
-            await this.prismaService.user.update({ where, data: {
+            const deletedResult = await this.prismaService.user.updateMany({ where, data: {
                 refreshToken: null,
             }});
-            return;
+            return deletedResult;
         } catch(err) {
             this.logger.error(err);
             throw new RepositoryBadGatewayException(err.meesage);
