@@ -17,27 +17,34 @@ export class PostLikeScheduleService {
 
     @Cron(CronExpression.EVERY_MINUTE)
     async processPostLikeEvent(): Promise<void> {
-        this.logger.log('좋아요 스케쥴 시작');
+        const now = Date.now();
         try {
             const allOldKeys = [REDIS_POSTS, REDIS_ALL, REDIS_LIKES, REDIS_SET, REDIS_OLD].join(':');
             const likesOldKeys = await this.redisClient.keys(allOldKeys);
+            let count = 0;
 
             for (const likesOldKey of likesOldKeys) {
                 const postId = Number(likesOldKey.split(':')[1]);
                 const likesNewKey = [REDIS_POSTS, postId, REDIS_LIKES, REDIS_SET, REDIS_NEW].join(':');
-                const createSet = await this.redisClient.sdiff(likesNewKey, likesOldKey);
+                
+                const [createSet, deleteSet] = await Promise.all([
+                    this.redisClient.sdiff(likesNewKey, likesOldKey),
+                    this.redisClient.sinter(likesNewKey, likesOldKey),
+                ]);
                 const createArray = createSet.map(userId => ({ postId, userId: Number(userId) }));
-                const deleteSet = await this.redisClient.sinter(likesNewKey, likesOldKey);
-                const deleteArray = deleteSet.map(userId => ({ postId, userId: Number(userId) }));
-                for (const deleteItem of deleteArray) {
-                    await this.postLikeRepository.deletePostLikes(deleteItem);
-                }
-                await Promise.all([
+                const userIds = deleteSet.map(Number);
+                
+                const [deletedResult, createdResult] = await Promise.all([
+                    this.postLikeRepository.deletePostLikes({ postId, userIds }),
                     this.postLikeRepository.createPostLikes(createArray),
                     this.redisClient.del(likesOldKey),
                     this.redisClient.del(likesNewKey),
                 ]);
+                count += deletedResult.count + createdResult.count;
             }
+
+            this.logger.log(`좋아요 스케쥴 성공: ${count}개 ${Date.now() - now}ms`);
+            return;
         } catch(err) {
             this.logger.error(err);
             throw new RepositoryBadGatewayException(err.message);

@@ -1,8 +1,9 @@
 import { PrismaService } from "@_/prisma/prisma.service";
 import { Injectable, Logger } from "@nestjs/common";
 import { ITogglePostLikeReq } from "./types/toggle-post-like.req.interface";
-import { PostLike } from "@prisma/client";
+import { PostLike, Prisma } from "@prisma/client";
 import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
+import { IDeletePostLikeReq } from "./types/delete-post-like.req.interface";
 
 @Injectable()
 export class PostLikeRepository {
@@ -25,7 +26,7 @@ export class PostLikeRepository {
         }
     }
 
-    async getPostLikesCountByPostId(postId: number): Promise<number> {
+    async getPostLikeCountByPostId(postId: number): Promise<number> {
         const where = {
             postId,
             deletedAt: null,
@@ -51,20 +52,20 @@ export class PostLikeRepository {
         }
     }
 
-    async createPostLike(data: ITogglePostLikeReq): Promise<void> {
+    async createPostLike(data: ITogglePostLikeReq): Promise<PostLike> {
         try {
-            await this.prismaService.postLike.create({ data });
-            return;
+            const createdPostLike = await this.prismaService.postLike.create({ data });
+            return createdPostLike;
         } catch(err) {
             this.logger.error(err);
             throw new RepositoryBadGatewayException(err.message);
         }
     }
 
-    async createPostLikes(data: ITogglePostLikeReq[]): Promise<void> {
+    async createPostLikes(data: ITogglePostLikeReq[]): Promise<Prisma.BatchPayload> {
         try {
-            await this.prismaService.postLike.createMany({ data });
-            return;
+            const createdCount = await this.prismaService.postLike.createMany({ data });
+            return createdCount;
         } catch(err) {
             this.logger.error(err);
             throw new RepositoryBadGatewayException(err.message);
@@ -90,19 +91,23 @@ export class PostLikeRepository {
         }
     }
 
-    async deletePostLikes(ids: ITogglePostLikeReq): Promise<void> {
+    async deletePostLikes({ postId, userIds }: IDeletePostLikeReq): Promise<Prisma.BatchPayload> {
         const where = {
-            ...ids,
+            postId,
+            userId: {
+                in: userIds,
+            },
             deletedAt: null,
         };
         const data = {
             deletedAt: new Date(),
         };
         try {
-            await this.prismaService.postLike.updateMany({
+            const deletedResult = await this.prismaService.postLike.updateMany({
                 data,
                 where,
             });
+            return deletedResult;
         } catch(err) {
             this.logger.error(err);
             throw new RepositoryBadGatewayException(err.message);

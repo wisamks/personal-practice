@@ -14,21 +14,21 @@ export class PostLikeService {
         private readonly redisClient: Redis,
     ) {}
 
-    async getPostLikesCountByPostId(postId: number): Promise<number> {
-        const likesCountKey = [REDIS_POSTS, postId, REDIS_LIKES, REDIS_COUNT].join(':');
+    async getPostLikeCountByPostId(postId: number): Promise<number> {
+        const likeCountKey = [REDIS_POSTS, postId, REDIS_LIKES, REDIS_COUNT].join(':');
 
-        const redisLikesCount = await this.redisClient.get(likesCountKey);
-        if (redisLikesCount) {
-            return Number(redisLikesCount);
+        const redisLikeCount = await this.redisClient.get(likeCountKey);
+        if (redisLikeCount) {
+            return Number(redisLikeCount);
         }
 
-        const likesCount = await this.postLikeRepository.getPostLikesCountByPostId(postId);
-        await this.redisClient.set(likesCountKey, String(likesCount), 'EX', ONE_HOUR_BY_SECOND);
-        return likesCount;
+        const likeCount = await this.postLikeRepository.getPostLikeCountByPostId(postId);
+        await this.redisClient.set(likeCountKey, String(likeCount), 'EX', ONE_HOUR_BY_SECOND);
+        return likeCount;
     }
 
     async togglePostLike({ userId, postId }: ITogglePostLikeReq): Promise<void> {
-        const likesCountKey = [REDIS_POSTS, postId, REDIS_LIKES, REDIS_COUNT].join(':');
+        const likeCountKey = [REDIS_POSTS, postId, REDIS_LIKES, REDIS_COUNT].join(':');
         const likeSetKey = [REDIS_POSTS, postId, REDIS_LIKES, REDIS_SET].join(':');
         const likeOldSetKey = [likeSetKey, REDIS_OLD].join(':');
         const likeNewSetKey = [likeSetKey, REDIS_NEW].join(':');
@@ -39,7 +39,7 @@ export class PostLikeService {
             likeUsers.push(REDIS_DEFAULT_ZERO);
             await this.redisClient.sadd(likeOldSetKey, likeUsers);
             const setSize = await this.redisClient.scard(likeOldSetKey);
-            await this.redisClient.set(likesCountKey, setSize-1, 'EX', ONE_HOUR_BY_SECOND);
+            await this.redisClient.set(likeCountKey, setSize-1, 'EX', ONE_HOUR_BY_SECOND);
         }
         const isUserInNewSet = await this.redisClient.sismember(likeNewSetKey, userId);
         if (!isUserInNewSet) {
@@ -50,9 +50,9 @@ export class PostLikeService {
 
         const isUserInOldSet = await this.redisClient.sismember(likeOldSetKey, userId);
         if(isUserInNewSet === isUserInOldSet) {
-            await this.redisClient.incr(likesCountKey);
+            await this.redisClient.incr(likeCountKey);
         } else {
-            await this.redisClient.decr(likesCountKey);
+            await this.redisClient.decr(likeCountKey);
         }
         return;
     }
