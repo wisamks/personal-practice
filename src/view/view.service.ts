@@ -22,7 +22,7 @@ export class ViewService {
             return Number(redisViewsCount);
         }
 
-        const foundViewCount = await this.viewRepository.getViewCountByPostId(postId);
+        const foundViewCount = await this.viewRepository.findViewCountByPostId(postId);
         await this.redisClient.set(viewCountKey, String(foundViewCount), 'EX', ONE_HOUR_BY_SECOND);
         return foundViewCount;
     }
@@ -33,7 +33,7 @@ export class ViewService {
 
         const redisViewCount = await this.redisClient.get(viewCountKey);
         if (!redisViewCount) {
-            const dbViewsCount = await this.viewRepository.getViewCountByPostId(postId);
+            const dbViewsCount = await this.viewRepository.findViewCountByPostId(postId);
             await this.redisClient.set(viewCountKey, dbViewsCount, 'EX', ONE_HOUR_BY_SECOND);
         }
         const viewLog = {

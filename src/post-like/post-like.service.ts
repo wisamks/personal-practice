@@ -22,7 +22,7 @@ export class PostLikeService {
             return Number(redisLikeCount);
         }
 
-        const likeCount = await this.postLikeRepository.getPostLikeCountByPostId(postId);
+        const likeCount = await this.postLikeRepository.findPostLikeCountByPostId(postId);
         await this.redisClient.set(likeCountKey, String(likeCount), 'EX', ONE_HOUR_BY_SECOND);
         return likeCount;
     }
@@ -34,7 +34,7 @@ export class PostLikeService {
         const likeNewSetKey = [likeSetKey, REDIS_NEW].join(':');
         const redisLikeOldSet = await this.redisClient.smembers(likeOldSetKey);
         if (redisLikeOldSet.length === 0) {
-            const dbLikes = await this.postLikeRepository.getPostLikesByPostId(postId);
+            const dbLikes = await this.postLikeRepository.findPostLikesByPostId(postId);
             const likeUsers = dbLikes.map(dbLike => dbLike.userId);
             likeUsers.push(REDIS_DEFAULT_ZERO);
             await this.redisClient.sadd(likeOldSetKey, likeUsers);

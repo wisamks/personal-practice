@@ -13,7 +13,7 @@ export class PostLikeRepository {
         private readonly prismaService: PrismaService,
     ) {}
 
-    async getPostLikesByPostId(postId: number): Promise<PostLike[]> {
+    async findPostLikesByPostId(postId: number): Promise<PostLike[]> {
         const where = {
             postId,
             deletedAt: null,
@@ -26,7 +26,7 @@ export class PostLikeRepository {
         }
     }
 
-    async getPostLikeCountByPostId(postId: number): Promise<number> {
+    async findPostLikeCountByPostId(postId: number): Promise<number> {
         const where = {
             postId,
             deletedAt: null,
@@ -39,7 +39,7 @@ export class PostLikeRepository {
         }
     }
 
-    async getPostLikeByPostAndUser(data: ITogglePostLikeReq): Promise<PostLike> {
+    async findPostLikeByPostAndUser(data: ITogglePostLikeReq): Promise<PostLike> {
         const where = {
             ...data,
             deletedAt: null,

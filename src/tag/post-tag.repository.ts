@@ -11,7 +11,7 @@ export class PostTagRepository {
         private readonly prismaService: PrismaService,
     ) {}
 
-    async getRelationsByPostId(postId: number): Promise<PostTag[]> {
+    async findRelationsByPostId(postId: number): Promise<PostTag[]> {
         const foundRelations = await this.prismaService.postTag.findMany({
             where: { postId }
         });

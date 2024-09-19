@@ -16,7 +16,8 @@ import { PostLikeService } from '@_/post-like/post-like.service';
 import { Redis } from 'ioredis';
 import { Post } from '@prisma/client';
 import { ONE_HOUR_BY_SECOND, REDIS_COMMENTS, REDIS_COUNT, REDIS_DEFAULT_PAGE, REDIS_LIKES, REDIS_POSTS, REDIS_TAGS, REDIS_VIEWS } from '@_/redis/constants/redis.constant';
-import { PostForbiddenException, PostNotFoundException } from '@_/common/custom-error.util';
+import { PostForbiddenException, PostInternalServerErrorException, PostNotFoundException } from '@_/common/custom-error.util';
+import { IDeletePostQuery } from './types/delete-post.query.interface';
 
 @Injectable()
 export class PostService {
@@ -34,7 +35,7 @@ export class PostService {
     ) {}
 
     async getPostsByCursor(getCursorReqDto: GetCursorReqDto): Promise<GetPostResDto[]> {
-        const foundPosts = await this.postRepository.getPostsByCursor(getCursorReqDto);
+        const foundPosts = await this.postRepository.findPostsByCursor(getCursorReqDto);
         const result = [];
         for (const foundPost of foundPosts) {
             const [
@@ -44,7 +45,7 @@ export class PostService {
                 viewsCount,
             ] = await Promise.all([
                 this.tagService.getTagsByPostId(foundPost.id),
-                this.commentService.getCommentsCountByPostId(foundPost.id),
+                this.commentService.getCommentCountByPostId(foundPost.id),
                 this.postLikeService.getPostLikeCountByPostId(foundPost.id),
                 this.viewService.getViewCountByPostId(foundPost.id),
             ]);
@@ -62,7 +63,7 @@ export class PostService {
     }
 
     async getPosts(getPostsReqDto: GetPostsReqDto): Promise<GetPostResDto[]> {
-        const foundPosts = await this.postRepository.getPosts(getPostsReqDto);
+        const foundPosts = await this.postRepository.findPosts(getPostsReqDto);
         const result = [];
         for (const foundPost of foundPosts) {
             const [
@@ -72,7 +73,7 @@ export class PostService {
                 viewsCount,
             ] = await Promise.all([
                 this.tagService.getTagsByPostId(foundPost.id),
-                this.commentService.getCommentsCountByPostId(foundPost.id),
+                this.commentService.getCommentCountByPostId(foundPost.id),
                 this.postLikeService.getPostLikeCountByPostId(foundPost.id),
                 this.viewService.getViewCountByPostId(foundPost.id),
             ]);
@@ -94,6 +95,8 @@ export class PostService {
         userId: number,
     }): Promise<GetPostResDto> {
         const postKey = [REDIS_POSTS, postId].join(':');
+        const tagKey = [postKey, REDIS_TAGS].join(':');
+        const commentKey = [postKey, REDIS_COMMENTS, REDIS_DEFAULT_PAGE].join(':');
 
         // 기본 post 가져오고 없으면 에러
         let foundPost: Post;
@@ -101,11 +104,18 @@ export class PostService {
         if (redisPost) {
             foundPost = JSON.parse(redisPost);
         } else {
-            const dbPost = await this.postRepository.getPost(postId);
+            const dbPost = await this.postRepository.findPost(postId);
             if (!dbPost) {
                 throw new PostNotFoundException();
             }
-            await this.redisClient.set(postKey, JSON.stringify(dbPost), 'EX', ONE_HOUR_BY_SECOND);
+            const dbTags = dbPost.tags.map(tag => tag.tag.name);
+            const dbComments = dbPost.comments;
+
+            await Promise.all([
+                this.redisClient.set(tagKey, JSON.stringify(dbTags), 'EX', ONE_HOUR_BY_SECOND),
+                this.redisClient.set(commentKey, JSON.stringify(dbComments), 'EX', ONE_HOUR_BY_SECOND),
+                this.redisClient.set(postKey, JSON.stringify(dbPost), 'EX', ONE_HOUR_BY_SECOND),
+            ]);
             foundPost = dbPost;
         }
 
@@ -121,7 +131,7 @@ export class PostService {
                 getCommentsReqDto: POST_GET_COMMENT_REQ,
                 postId,
             }),
-            this.commentService.getCommentsCountByPostId(postId),
+            this.commentService.getCommentCountByPostId(postId),
             this.postLikeService.getPostLikeCountByPostId(postId),
             this.viewService.getViewCountByPostId(postId)
         ]);
@@ -158,7 +168,7 @@ export class PostService {
 
             // 레디스 write through
             const postKey = [REDIS_POSTS, createdPost.id].join(':');
-            const foundPost = await this.postRepository.getPost(createdPost.id);
+            const foundPost = await this.postRepository.findPost(createdPost.id);
             await this.redisClient.set(postKey, JSON.stringify(foundPost), 'EX', ONE_HOUR_BY_SECOND);
             
             return plainToInstance(CreatePostResDto, createdPost);
@@ -173,60 +183,57 @@ export class PostService {
         const postKey = [REDIS_POSTS, postId].join(':');
 
         const { title, content, tags } = updatePostReqDto;
-        const foundPost = await this.postRepository.getPost(postId);
-        if (!foundPost) {
-            throw new PostNotFoundException();
-        }
-        if (foundPost.authorId !== userId) {
-            throw new PostForbiddenException();
-        }
 
-        return await this.prismaService.$transaction( async tx => { 
-            await Promise.all([
-                this.postRepository.updatePost(tx, { data: { title, content }, postId }),
-                this.tagService.updateTags(tx, { tags, postId }),
-            ]);
-
-            // 레디스 write through
-            const updatedPost = await this.postRepository.getPost(postId);
-            await this.redisClient.set(postKey, JSON.stringify(updatedPost), 'EX', ONE_HOUR_BY_SECOND);
-            
-            return;
+        await this.prismaService.$transaction( async tx => { 
+            const updatedResult = await this.postRepository.updatePost(tx, { data: { title, content }, postId, userId });
+            if (updatedResult.count) {
+                await this.tagService.updateTags(tx, { tags, postId });
+                // 레디스 write through
+                const updatedPost = await this.postRepository.findPost(postId);
+                await this.redisClient.set(postKey, JSON.stringify(updatedPost), 'EX', ONE_HOUR_BY_SECOND);
+                
+                return;
+            }
+            const foundPost = await this.postRepository.findPost(postId);
+            if (!foundPost) {
+                throw new PostNotFoundException();
+            }
+            if (foundPost.authorId !== userId) {
+                throw new PostForbiddenException();
+            }
+            throw new PostInternalServerErrorException();
         });
-           
+        return;
     }
 
-    async deletePost({ postId, userId }: {
-        postId: number;
-        userId: number;
-    }): Promise<void> {
+    async deletePost({ postId, userId }: IDeletePostQuery): Promise<void> {
         const postKey = [REDIS_POSTS, postId].join(':');
         const commentsKey = [postKey, REDIS_COMMENTS, REDIS_DEFAULT_PAGE].join(':');
         const commentsCountKey = [postKey, REDIS_COMMENTS, REDIS_COUNT].join(':');
         const viewsCountKey = [postKey, REDIS_VIEWS, REDIS_COUNT].join(':');
         const likesCountKey = [postKey, REDIS_LIKES, REDIS_COUNT].join(':');
-
-        const foundPost = await this.postRepository.getPost(postId);
-        if (!foundPost) {
-            throw new PostNotFoundException();
-        }
-        if (foundPost.authorId !== userId) {
-            throw new PostForbiddenException();
-        }
         
         return await this.prismaService.$transaction( async tx => {
-            await Promise.all([
-                this.postRepository.deletePost(tx, postId),
-                this.tagService.deleteTags(tx, postId),
-            ]);
-            await Promise.all([
-                this.redisClient.del(postKey),
-                this.redisClient.del(commentsKey),
-                this.redisClient.del(commentsCountKey),
-                this.redisClient.del(viewsCountKey),
-                this.redisClient.del(likesCountKey),
-            ]);
-            return;
+            const deletedResult = await this.postRepository.deletePost(tx, { postId, userId });
+            if (deletedResult.count) {
+                await Promise.all([
+                    this.tagService.deleteTags(tx, postId),
+                    this.redisClient.del(postKey),
+                    this.redisClient.del(commentsKey),
+                    this.redisClient.del(commentsCountKey),
+                    this.redisClient.del(viewsCountKey),
+                    this.redisClient.del(likesCountKey),
+                ])
+                return;
+            }
+            const foundPost = await this.postRepository.findPost(postId);
+            if (!foundPost) {
+                throw new PostNotFoundException();
+            }
+            if (foundPost.authorId !== userId) {
+                throw new PostForbiddenException();
+            }
+            throw new PostInternalServerErrorException();
         });
     }
 }

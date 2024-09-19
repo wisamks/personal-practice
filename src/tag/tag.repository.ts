@@ -11,7 +11,7 @@ export class TagRepository {
         private readonly prismaService: PrismaService,
     ) {}
 
-    async getTag(id: number): Promise<Tag> {
+    async findTag(id: number): Promise<Tag> {
         const where = {
             id,
             deletedAt: null,
@@ -24,7 +24,7 @@ export class TagRepository {
         }
     }
 
-    async getTagByName(tx: Prisma.TransactionClient, name: string): Promise<Tag> {
+    async findTagByName(tx: Prisma.TransactionClient, name: string): Promise<Tag> {
         const where = {
             name,
             deletedAt: null,

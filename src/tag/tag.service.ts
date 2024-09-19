@@ -24,10 +24,10 @@ export class TagService {
             return JSON.parse(redisTags);
         }
 
-        const foundRelations = await this.postTagRepository.getRelationsByPostId(postId);
+        const foundRelations = await this.postTagRepository.findRelationsByPostId(postId);
         const foundTags = [];
         for (const relation of foundRelations) {
-            const foundTag = await this.tagRepository.getTag(relation.tagId);
+            const foundTag = await this.tagRepository.findTag(relation.tagId);
             foundTags.push(foundTag.name);
         }
         await this.redisClient.set(tagsKey, JSON.stringify(foundTags), 'EX', ONE_HOUR_BY_SECOND);
@@ -42,7 +42,7 @@ export class TagService {
         const restTags = [];
 
         for (const tag of tags) {
-            const foundTag = await this.tagRepository.getTagByName(tx, tag);
+            const foundTag = await this.tagRepository.findTagByName(tx, tag);
             if (foundTag) {
                 tagIds.push(foundTag.id);
             } else {

@@ -25,11 +25,13 @@ enum UserExceptionMessage {
 enum PostExceptionMessage {
     FORBIDDEN = '접근 권한이 없습니다.',
     NOT_FOUND = '존재하지 않는 게시글입니다.',
+    INTERNAL_SERVER_ERROR = '게시글 관련 작업 중 알 수 없는 오류가 발생했습니다.',
 }
 
 enum CommentExceptionMessage {
     FORBIDDEN = '접근 권한이 없습니다.',
     NOT_FOUND = '존재하지 않는 댓글입니다.',
+    INTERNAL_SERVER_ERROR = '댓글 관련 작업 중 알 수 없는 오류가 발생했습니다.'
 }
 
 enum UncaughtExceptionMessage {
@@ -40,13 +42,13 @@ enum UncaughtExceptionMessage {
 
 export class RepositoryBadGatewayException extends BadGatewayException {
     constructor(message?: string) {
-        super({ message: message = RepostioryExceptionMessage.BAD_GATEWAY });
+        super({ statusCode: HttpStatus.BAD_GATEWAY, message: message = RepostioryExceptionMessage.BAD_GATEWAY });
     }
 }
 
 export class RepositoryServiceUnavailableException extends ServiceUnavailableException {
     constructor(message?: string) {
-        super({ message: message = RepostioryExceptionMessage.SERVICE_UNAVAILABLE });
+        super({ statusCode: HttpStatus.SERVICE_UNAVAILABLE, message: message = RepostioryExceptionMessage.SERVICE_UNAVAILABLE });
     }
 }
 
@@ -54,19 +56,19 @@ export class RepositoryServiceUnavailableException extends ServiceUnavailableExc
 
 export class AuthBadRequestException extends BadRequestException {
     constructor() {
-        super({ message: AuthExceptionMessage.BAD_REQUEST })
+        super({ statusCode: HttpStatus.BAD_REQUEST, message: AuthExceptionMessage.BAD_REQUEST })
     }
 }
 
 export class AuthNotFoundException extends NotFoundException {
     constructor() {
-        super({ message: AuthExceptionMessage.NOT_FOUND })
+        super({ statusCode: HttpStatus.NOT_FOUND, message: AuthExceptionMessage.NOT_FOUND })
     }
 }
 
 export class AuthJwtException extends InternalServerErrorException {
     constructor(message?: string) {
-        super({ message: message = AuthExceptionMessage.JWT_UNEXPECTED });
+        super({ statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: message = AuthExceptionMessage.JWT_UNEXPECTED });
     }
 }
 
@@ -74,13 +76,13 @@ export class AuthJwtException extends InternalServerErrorException {
 
 export class AuthForbiddenException extends ForbiddenException {
     constructor() {
-        super({ message: AuthExceptionMessage.FORBIDDEN });
+        super({ statusCode: HttpStatus.FORBIDDEN, message: AuthExceptionMessage.FORBIDDEN });
     }
 }
 
 export class AuthServiceUnavailableException extends ServiceUnavailableException {
     constructor() {
-        super({ message: AuthExceptionMessage.SERVICE_UNAVAILABLE });
+        super({ statusCode: HttpStatus.SERVICE_UNAVAILABLE, message: AuthExceptionMessage.SERVICE_UNAVAILABLE });
     }
 }
 
@@ -88,7 +90,7 @@ export class AuthServiceUnavailableException extends ServiceUnavailableException
 
 export class AuthUnauthorizedException extends UnauthorizedException {
     constructor() {
-        super({ message: AuthExceptionMessage.UNAUTHORIZED });
+        super({ statusCode: HttpStatus.UNAUTHORIZED, message: AuthExceptionMessage.UNAUTHORIZED });
     }
 }
 
@@ -96,19 +98,19 @@ export class AuthUnauthorizedException extends UnauthorizedException {
 
 export class UserNotFoundException extends NotFoundException {
     constructor() {
-        super({ message: UserExceptionMessage.NOT_FOUND });
+        super({ statusCode: HttpStatus.NOT_FOUND, message: UserExceptionMessage.NOT_FOUND });
     }
 }
 
 export class UserConflictEmailException extends ConflictException {
     constructor() {
-        super({ message: UserExceptionMessage.CONFILCT_EMAIL });
+        super({ statusCode: HttpStatus.CONFLICT, message: UserExceptionMessage.CONFILCT_EMAIL });
     }
 }
 
 export class UserInternalServerErrorException extends InternalServerErrorException {
     constructor() {
-        super({ message: UserExceptionMessage.INTERNAL_SERVER_ERROR })
+        super({ statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: UserExceptionMessage.INTERNAL_SERVER_ERROR })
     }
 }
 
@@ -116,13 +118,19 @@ export class UserInternalServerErrorException extends InternalServerErrorExcepti
 
 export class PostForbiddenException extends ForbiddenException {
     constructor() {
-        super({ message: PostExceptionMessage.FORBIDDEN });
+        super({ statusCode: HttpStatus.FORBIDDEN, message: PostExceptionMessage.FORBIDDEN });
     }
 }
 
 export class PostNotFoundException extends NotFoundException {
     constructor() {
-        super({ message: PostExceptionMessage.NOT_FOUND });
+        super({ statusCode: HttpStatus.NOT_FOUND, message: PostExceptionMessage.NOT_FOUND });
+    }
+}
+
+export class PostInternalServerErrorException extends InternalServerErrorException {
+    constructor() {
+        super({ statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: PostExceptionMessage.INTERNAL_SERVER_ERROR });
     }
 }
 
@@ -130,13 +138,19 @@ export class PostNotFoundException extends NotFoundException {
 
 export class CommentForbiddenException extends ForbiddenException {
     constructor() {
-        super({ message: CommentExceptionMessage.FORBIDDEN });
+        super({ statusCode: HttpStatus.FORBIDDEN, message: CommentExceptionMessage.FORBIDDEN });
     }
 }
 
 export class CommentNotFoundException extends NotFoundException {
     constructor() {
-        super({ message: CommentExceptionMessage.NOT_FOUND });
+        super({ statusCode: HttpStatus.NOT_FOUND, message: CommentExceptionMessage.NOT_FOUND });
+    }
+}
+
+export class CommentInternalServerErrorException extends InternalServerErrorException {
+    constructor() {
+        super({ statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: CommentExceptionMessage.INTERNAL_SERVER_ERROR });
     }
 }
 
@@ -144,6 +158,6 @@ export class CommentNotFoundException extends NotFoundException {
 
 export class UncaughtException extends InternalServerErrorException {
     constructor(message?: string) {
-        super({ message: message = UncaughtExceptionMessage.UNCAUGHT });
+        super({ statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: message = UncaughtExceptionMessage.UNCAUGHT });
     }
 }

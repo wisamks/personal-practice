@@ -13,7 +13,7 @@ export class CommentRepository {
         private readonly prismaService: PrismaService,
     ) {}
 
-    async getCommentsCountByPostId(postId: number): Promise<number> {
+    async findCommentCountByPostId(postId: number): Promise<number> {
         const where = {
             postId,
             deletedAt: null,
@@ -26,7 +26,7 @@ export class CommentRepository {
         }
     }
 
-    async getCommentsByPostId({ postId, take, cursor }: IGetCommentsInput): Promise<Comment[]> {
+    async findCommentsByPostId({ postId, take, cursor }: IGetCommentsInput): Promise<Comment[]> {
         const where = {
             postId,
             deletedAt: null,
@@ -52,7 +52,7 @@ export class CommentRepository {
         }
     }
 
-    async getComment(commentId: number): Promise<Comment> {
+    async findComment(commentId: number): Promise<Comment> {
         const where = {
             id: commentId,
             deletedAt: null,
@@ -65,12 +65,12 @@ export class CommentRepository {
         }
     }
 
-    async createComment(data: ICreateCommentInput): Promise<Pick<Comment, 'id'>> {
+    async createComment(data: ICreateCommentInput): Promise<Comment> {
         try {
             const createdComment = await this.prismaService.comment.create({
                 data
             });
-            return { id: createdComment.id };
+            return createdComment;
         } catch(err) {
             this.logger.error(err);
             throw new RepositoryBadGatewayException(err.message);
@@ -80,24 +80,24 @@ export class CommentRepository {
     async updateComment({data, commentId}: {
         data: Prisma.CommentUpdateInput;
         commentId: number;
-    }): Promise<void> {
+    }): Promise<Prisma.BatchPayload> {
         const where = {
             id: commentId,
             deletedAt: null,
         };
         try {
-            await this.prismaService.comment.update({
+            const updatedResult = await this.prismaService.comment.updateMany({
                 data,
                 where,
             });
-            return;
+            return updatedResult;
         } catch(err) {
             this.logger.error(err);
             throw new RepositoryBadGatewayException(err.message);
         }
     }
 
-    async deleteComment(commentId: number): Promise<void> {
+    async deleteComment(commentId: number): Promise<Prisma.BatchPayload> {
         const where = {
             id: commentId,
             deletedAt: null,
@@ -106,10 +106,11 @@ export class CommentRepository {
             deletedAt: new Date(),
         }
         try {
-            await this.prismaService.comment.update({
+            const deletedResult = await this.prismaService.comment.updateMany({
                 where,
                 data
             });
+            return deletedResult;
         } catch(err) {
             this.logger.error(err);
             throw new RepositoryBadGatewayException(err.message);

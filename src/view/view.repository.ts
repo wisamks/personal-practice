@@ -12,7 +12,7 @@ export class ViewRepository {
         private readonly prismaService: PrismaService,
     ) {}
 
-    async getViewCountByPostId(postId: number): Promise<number> {
+    async findViewCountByPostId(postId: number): Promise<number> {
         const where = {
             postId,
             deletedAt: null,

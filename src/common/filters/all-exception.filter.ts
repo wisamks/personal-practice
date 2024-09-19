@@ -11,7 +11,7 @@ export class AllExceptionFilter implements ExceptionFilter {
 
         let message: string;
         let statusCode: number;
-        const filteredException = exception instanceof HttpException ? exception : new UncaughtException();
+        const filteredException = exception instanceof HttpException && exception.getStatus() ? exception : new UncaughtException();
         const exceptionResponse = filteredException.getResponse() as {
             message: string;
             statusCode: number;

@@ -10,7 +10,7 @@ import { UpdateCommentReqDto } from './dto/request/update-comment.req.dto';
 import { ONE_HOUR_BY_SECOND, REDIS_COMMENTS, REDIS_COUNT, REDIS_DEFAULT_PAGE, REDIS_POSTS } from '@_/redis/constants/redis.constant';
 import { Redis } from 'ioredis';
 import { Comment } from '@prisma/client';
-import { CommentForbiddenException, CommentNotFoundException } from '@_/common/custom-error.util';
+import { CommentForbiddenException, CommentInternalServerErrorException, CommentNotFoundException } from '@_/common/custom-error.util';
 
 @Injectable()
 export class CommentService {
@@ -22,7 +22,7 @@ export class CommentService {
         private readonly redisClient: Redis,
     ) {}
 
-    async getCommentsCountByPostId(postId: number): Promise<number> {
+    async getCommentCountByPostId(postId: number): Promise<number> {
         const commentsCountKey = [REDIS_POSTS, postId, REDIS_COMMENTS, REDIS_COUNT].join(':');
 
         const redisCommentsCount = await this.redisClient.get(commentsCountKey);
@@ -30,7 +30,7 @@ export class CommentService {
             return Number(redisCommentsCount);
         }
 
-        const dbCommentsCount = await this.commentRepository.getCommentsCountByPostId(postId);
+        const dbCommentsCount = await this.commentRepository.findCommentCountByPostId(postId);
         await this.redisClient.set(commentsCountKey, String(dbCommentsCount), 'EX', ONE_HOUR_BY_SECOND);
         return dbCommentsCount;
     }
@@ -45,7 +45,7 @@ export class CommentService {
             return JSON.parse(redisComments);
         }
 
-        const foundComments = await this.commentRepository.getCommentsByPostId({
+        const foundComments = await this.commentRepository.findCommentsByPostId({
             ...getCommentsReqDto,
             postId,
         });
@@ -57,7 +57,7 @@ export class CommentService {
         getCommentsReqDto: GetCommentsReqDto;
         postId: number;
     }): Promise<GetCommentResDto[]> {
-        const foundComments = await this.commentRepository.getCommentsByPostId({
+        const foundComments = await this.commentRepository.findCommentsByPostId({
             ...getCommentsReqDto,
             postId,
         });
@@ -72,7 +72,7 @@ export class CommentService {
         const commentsKey = [REDIS_POSTS, postId, REDIS_COMMENTS, REDIS_DEFAULT_PAGE].join(':');
         const commentsCountKey = [REDIS_POSTS, postId, REDIS_COMMENTS, REDIS_COUNT].join(':');
 
-        const createdResult = await this.commentRepository.createComment({
+        const createdComment = await this.commentRepository.createComment({
             ...createCommentReqDto,
             postId,
             authorId: userId,
@@ -85,58 +85,68 @@ export class CommentService {
         }
         await this.redisClient.del(commentsKey);
 
-        return plainToInstance(CreateCommentResDto, createdResult);
+        return plainToInstance(CreateCommentResDto, createdComment);
     }
 
-    async updateComment({ updateCommentReqDto, userId, commentId }: {
+    async updateComment({ updateCommentReqDto, postId, userId, commentId }: {
         updateCommentReqDto: UpdateCommentReqDto;
+        postId: number;
         userId: number;
         commentId: number;
     }): Promise<void> {
-        const foundComment = await this.commentRepository.getComment(commentId);
-        if (!foundComment) {
-            throw new CommentNotFoundException();
-        }
-        if (foundComment.authorId !== userId) {
-            throw new CommentForbiddenException();
-        }
-
         // 레디스
-        const commentsKey = [REDIS_POSTS, foundComment.postId, REDIS_COMMENTS, REDIS_DEFAULT_PAGE].join(':');
+        const commentsKey = [REDIS_POSTS, postId, REDIS_COMMENTS, REDIS_DEFAULT_PAGE].join(':');
         await this.redisClient.del(commentsKey);
         
-        return await this.commentRepository.updateComment({
+        const updatedResult = await this.commentRepository.updateComment({
             data: updateCommentReqDto,
             commentId,
         });
-    }
 
-    async deleteComment({ commentId, userId }: {
-        commentId: number,
-        userId: number,
-    }): Promise<GetCommentResDto> {
-        const foundComment = await this.commentRepository.getComment(commentId);
+        if (updatedResult.count) {
+            return;
+        }
+        const foundComment = await this.commentRepository.findComment(commentId);
         if (!foundComment) {
             throw new CommentNotFoundException();
         }
         if (foundComment.authorId !== userId) {
             throw new CommentForbiddenException();
         }
-        const nextComment = await this.commentRepository.getCommentsByPostId({
-            postId: foundComment.postId,
+        throw new CommentInternalServerErrorException();
+    }
+
+    async deleteComment({ commentId, postId, userId }: {
+        commentId: number,
+        postId: number,
+        userId: number,
+    }): Promise<GetCommentResDto> {
+        
+        const nextComment = await this.commentRepository.findCommentsByPostId({
+            postId: postId,
             cursor: commentId,
             take: COMMENT_DELETE_TAKE,
         });
-        await this.commentRepository.deleteComment(commentId);
+        const deletedResult = await this.commentRepository.deleteComment(commentId);
+        if (deletedResult.count) {
+            // 레디스
+            const commentsKey = [REDIS_POSTS, postId, REDIS_COMMENTS, REDIS_DEFAULT_PAGE].join(':');
+            const commentsCountKey = [REDIS_POSTS, postId, REDIS_COMMENTS, REDIS_COUNT].join(':');
+            await Promise.all([
+                this.redisClient.del(commentsKey),
+                this.redisClient.decr(commentsCountKey)
+            ]);
 
-        // 레디스
-        const commentsKey = [REDIS_POSTS, foundComment.postId, REDIS_COMMENTS, REDIS_DEFAULT_PAGE].join(':');
-        const commentsCountKey = [REDIS_POSTS, foundComment.postId, REDIS_COMMENTS, REDIS_COUNT].join(':');
-        await Promise.all([
-            this.redisClient.del(commentsKey),
-            this.redisClient.decr(commentsCountKey)
-        ]);
-
-        return plainToInstance(GetCommentResDto, nextComment[0]);
+            return plainToInstance(GetCommentResDto, nextComment[0]);
+        }
+        
+        const foundComment = await this.commentRepository.findComment(commentId);
+        if (!foundComment) {
+            throw new CommentNotFoundException();
+        }
+        if (foundComment.authorId !== userId) {
+            throw new CommentForbiddenException();
+        }
+        throw new CommentInternalServerErrorException();
     }
 }

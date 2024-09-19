@@ -40,10 +40,11 @@ export class CommentController {
   @UseGuards(JwtAuthGuard)
   async updateComment(
     @Body() updateCommentReqDto: UpdateCommentReqDto,
+    @Param('postId', ParseIntPipe) postId: number,
     @Param('commentId', ParseIntPipe) commentId: number,
     @ReqUser('userId') userId: number, 
   ): Promise<void> {
-    return await this.commentService.updateComment({ updateCommentReqDto, commentId, userId });
+    return await this.commentService.updateComment({ updateCommentReqDto, postId, commentId, userId });
   }
 
   @Delete(PATH_COMMENT.COMMENT_ID)
@@ -51,8 +52,9 @@ export class CommentController {
   @UseGuards(JwtAuthGuard)
   async deleteComment(
     @Param('commentId', ParseIntPipe) commentId: number,
+    @Param('postId', ParseIntPipe) postId: number,
     @ReqUser('userId') userId: number, 
   ): Promise<GetCommentResDto> {
-    return await this.commentService.deleteComment({ commentId, userId });
+    return await this.commentService.deleteComment({ commentId, postId, userId });
   }
 }
