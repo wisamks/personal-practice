@@ -7,7 +7,7 @@ import { CreateUserResDto } from './dto/response/create-user.res.dto';
 import { UpdateUserReqDto } from './dto/request/update-user.req.dto';
 import { UserRepository } from './user.repository';
 import { IProviderOptions } from './types/provider-options.interface';
-import { UserConflictEmailException, UserNotFoundException } from '@_/common/custom-error.util';
+import { UserConflictEmailException, UserInternalServerErrorException, UserNotFoundException } from '@_/common/custom-error.util';
 
 @Injectable()
 export class UserService {
@@ -61,23 +61,31 @@ export class UserService {
         updateUserReqDto: UpdateUserReqDto;
         userId: number; 
     }): Promise<void> {
+        const foundEmail = await this.userRepository.findUserByEmail(updateUserReqDto.email);
+        if (foundEmail?.id !== userId) {
+            throw new UserConflictEmailException();
+        }
+        const updatedResult = await this.userRepository.updateUser({ updateUserReqDto, userId });
+        if (updatedResult.count) {
+            return;
+        }
         const foundUser = await this.userRepository.findUserById(userId);
         if (!foundUser) {
             throw new UserNotFoundException();
         }
-        const foundEmail = await this.userRepository.findUserByEmail(updateUserReqDto.email);
-        if (foundEmail && foundEmail.id !== userId) {
-            throw new UserConflictEmailException();
-        }
-        return await this.userRepository.updateUser({ updateUserReqDto, userId });
+        throw new UserInternalServerErrorException();
     }
 
     async deleteUser(userId: number): Promise<void> {
+        const deletedResult = await this.userRepository.deleteUser(userId);
+        if (deletedResult.count) {
+            return;
+        }
         const foundUser = await this.userRepository.findUserById(userId);
         if (!foundUser) {
             throw new UserNotFoundException();
         }
-        return await this.userRepository.deleteUser(userId);
+        throw new UserInternalServerErrorException();
     }
 
     async createRefresh(data: {

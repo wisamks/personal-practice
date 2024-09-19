@@ -1,7 +1,7 @@
 import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
 import { PrismaService } from "@_/prisma/prisma.service";
 import { Injectable, Logger } from "@nestjs/common";
-import { PostTag } from "@prisma/client";
+import { PostTag, Prisma } from "@prisma/client";
 
 @Injectable()
 export class PostTagRepository {
@@ -18,23 +18,23 @@ export class PostTagRepository {
         return foundRelations;
     }
 
-    async createRelations(tx: any, data: PostTag[]): Promise<void> {
+    async createRelations(tx: Prisma.TransactionClient, data: PostTag[]): Promise<Prisma.BatchPayload> {
         try {
-            await tx.postTag.createMany({ data });
-            return;
+            const createdResult = await tx.postTag.createMany({ data });
+            return createdResult;
         } catch(err) {
             this.logger.error(err);
             throw new RepositoryBadGatewayException(err.message);
         }
     }
 
-    async deleteRelationsByPostId(tx: any, postId: number): Promise<void> {  
+    async deleteRelationsByPostId(tx: Prisma.TransactionClient, postId: number): Promise<Prisma.BatchPayload> {  
         const where = {
             postId
         };
         try {
-            await tx.postTag.deleteMany({ where });
-            return;
+            const deletedResult = await tx.postTag.deleteMany({ where });
+            return deletedResult;
         } catch(err) {
             this.logger.error(err);
             throw new RepositoryBadGatewayException(err.message);

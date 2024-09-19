@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus } from "@nestjs/common";
+import { BadGatewayException, BadRequestException, ConflictException, ForbiddenException, HttpException, HttpStatus, InternalServerErrorException, NotFoundException, ServiceUnavailableException, UnauthorizedException } from "@nestjs/common";
 
 // --- enum ---
 
@@ -19,6 +19,7 @@ enum AuthExceptionMessage {
 enum UserExceptionMessage {
     CONFILCT_EMAIL = '이미 사용 중인 이메일입니다. 다른 이메일로 가입을 시도해주세요.',
     NOT_FOUND = '존재하지 않는 유저입니다.',
+    INTERNAL_SERVER_ERROR = '유저 관련 작업 중 알 수 없는 오류가 발생했습니다.',
 }
 
 enum PostExceptionMessage {
@@ -37,151 +38,112 @@ enum UncaughtExceptionMessage {
 
 // --- repository ---
 
-export class RepositoryBadGatewayException extends HttpException {
+export class RepositoryBadGatewayException extends BadGatewayException {
     constructor(message?: string) {
-        super({
-            statusCode: HttpStatus.BAD_GATEWAY,
-            message: message = RepostioryExceptionMessage.BAD_GATEWAY,
-        }, HttpStatus.BAD_GATEWAY);
+        super({ message: message = RepostioryExceptionMessage.BAD_GATEWAY });
     }
 }
 
-export class RepositoryServiceUnavailableException extends HttpException {
+export class RepositoryServiceUnavailableException extends ServiceUnavailableException {
     constructor(message?: string) {
-        super({
-            statusCode: HttpStatus.SERVICE_UNAVAILABLE,
-            message: message = RepostioryExceptionMessage.SERVICE_UNAVAILABLE,
-        }, HttpStatus.SERVICE_UNAVAILABLE);
+        super({ message: message = RepostioryExceptionMessage.SERVICE_UNAVAILABLE });
     }
 }
 
 // --- auth ---
 
-export class AuthBadRequestException extends HttpException {
+export class AuthBadRequestException extends BadRequestException {
     constructor() {
-        super({
-            statusCode: HttpStatus.BAD_REQUEST,
-            message: AuthExceptionMessage.BAD_REQUEST,
-        }, HttpStatus.BAD_REQUEST)
+        super({ message: AuthExceptionMessage.BAD_REQUEST })
     }
 }
 
-export class AuthNotFoundException extends HttpException {
+export class AuthNotFoundException extends NotFoundException {
     constructor() {
-        super({
-            statusCode: HttpStatus.NOT_FOUND,
-            message: AuthExceptionMessage.NOT_FOUND,
-        }, HttpStatus.NOT_FOUND)
+        super({ message: AuthExceptionMessage.NOT_FOUND })
     }
 }
 
-export class AuthJwtException extends HttpException {
+export class AuthJwtException extends InternalServerErrorException {
     constructor(message?: string) {
-        super({
-            statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-            message: message = AuthExceptionMessage.JWT_UNEXPECTED,
-        }, HttpStatus.INTERNAL_SERVER_ERROR);
+        super({ message: message = AuthExceptionMessage.JWT_UNEXPECTED });
     }
 }
 
 // --- auth strategy ---
 
-export class AuthForbiddenException extends HttpException {
+export class AuthForbiddenException extends ForbiddenException {
     constructor() {
-        super({
-            statusCode: HttpStatus.FORBIDDEN,
-            message: AuthExceptionMessage.FORBIDDEN,
-        }, HttpStatus.FORBIDDEN);
+        super({ message: AuthExceptionMessage.FORBIDDEN });
     }
 }
 
-export class AuthServiceUnavailableException extends HttpException {
+export class AuthServiceUnavailableException extends ServiceUnavailableException {
     constructor() {
-        super({
-            statusCode: HttpStatus.SERVICE_UNAVAILABLE,
-            message: AuthExceptionMessage.SERVICE_UNAVAILABLE,
-        }, HttpStatus.SERVICE_UNAVAILABLE);
+        super({ message: AuthExceptionMessage.SERVICE_UNAVAILABLE });
     }
 }
 
 // --- auth guard ---
 
-export class AuthUnauthorizedException extends HttpException {
+export class AuthUnauthorizedException extends UnauthorizedException {
     constructor() {
-        super({
-            statusCode: HttpStatus.UNAUTHORIZED,
-            message: AuthExceptionMessage.UNAUTHORIZED,
-        }, HttpStatus.UNAUTHORIZED);
+        super({ message: AuthExceptionMessage.UNAUTHORIZED });
     }
 }
 
 // --- user ---
 
-export class UserNotFoundException extends HttpException {
+export class UserNotFoundException extends NotFoundException {
     constructor() {
-        super({
-            statusCode: HttpStatus.NOT_FOUND,
-            message: UserExceptionMessage.NOT_FOUND,
-        }, HttpStatus.NOT_FOUND);
+        super({ message: UserExceptionMessage.NOT_FOUND });
     }
 }
 
-export class UserConflictEmailException extends HttpException {
+export class UserConflictEmailException extends ConflictException {
     constructor() {
-        super({
-            statusCode: HttpStatus.CONFLICT,
-            message: UserExceptionMessage.CONFILCT_EMAIL,
-        }, HttpStatus.CONFLICT);
+        super({ message: UserExceptionMessage.CONFILCT_EMAIL });
+    }
+}
+
+export class UserInternalServerErrorException extends InternalServerErrorException {
+    constructor() {
+        super({ message: UserExceptionMessage.INTERNAL_SERVER_ERROR })
     }
 }
 
 // --- post ---
 
-export class PostForbiddenException extends HttpException {
+export class PostForbiddenException extends ForbiddenException {
     constructor() {
-        super({
-            statusCode: HttpStatus.FORBIDDEN,
-            message: PostExceptionMessage.FORBIDDEN,
-        }, HttpStatus.FORBIDDEN);
+        super({ message: PostExceptionMessage.FORBIDDEN });
     }
 }
 
-export class PostNotFoundException extends HttpException {
+export class PostNotFoundException extends NotFoundException {
     constructor() {
-        super({
-            statusCode: HttpStatus.NOT_FOUND,
-            message: PostExceptionMessage.NOT_FOUND,
-        }, HttpStatus.NOT_FOUND);
+        super({ message: PostExceptionMessage.NOT_FOUND });
     }
 }
 
 // --- comment ---
 
-export class CommentForbiddenException extends HttpException {
+export class CommentForbiddenException extends ForbiddenException {
     constructor() {
-        super({
-            statusCode: HttpStatus.FORBIDDEN,
-            message: CommentExceptionMessage.FORBIDDEN,
-        }, HttpStatus.FORBIDDEN);
+        super({ message: CommentExceptionMessage.FORBIDDEN });
     }
 }
 
-export class CommentNotFoundException extends HttpException {
+export class CommentNotFoundException extends NotFoundException {
     constructor() {
-        super({
-            statusCode: HttpStatus.NOT_FOUND,
-            message: CommentExceptionMessage.NOT_FOUND,
-        }, HttpStatus.NOT_FOUND);
+        super({ message: CommentExceptionMessage.NOT_FOUND });
     }
 }
 
 // --- uncaught ---
 
-export class UncaughtException extends HttpException {
+export class UncaughtException extends InternalServerErrorException {
     constructor(message?: string) {
-        super({
-            statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-            message: message = UncaughtExceptionMessage.UNCAUGHT,
-        }, HttpStatus.INTERNAL_SERVER_ERROR);
+        super({ message: message = UncaughtExceptionMessage.UNCAUGHT });
     }
 }

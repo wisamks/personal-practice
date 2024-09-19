@@ -3,6 +3,7 @@ import { TagRepository } from "./tag.repository";
 import { PostTagRepository } from "./post-tag.repository";
 import { ONE_HOUR_BY_SECOND, REDIS_POSTS, REDIS_TAGS } from "@_/redis/constants/redis.constant";
 import { Redis } from "ioredis";
+import { Prisma } from "@prisma/client";
 
 @Injectable()
 export class TagService {
@@ -33,7 +34,7 @@ export class TagService {
         return foundTags;
     }
 
-    async createTags(tx: any, { tags, postId }: {
+    async createTags(tx: Prisma.TransactionClient, { tags, postId }: {
         tags: string[];
         postId: number;
     }): Promise<void> {
@@ -64,7 +65,7 @@ export class TagService {
         return;
     }
 
-    async updateTags(tx: any, { tags, postId }: {
+    async updateTags(tx: Prisma.TransactionClient, { tags, postId }: {
         tags: string[];
         postId: number;
     }): Promise<void> {
@@ -75,9 +76,10 @@ export class TagService {
         return;
     }
 
-    async deleteTags(tx: any, postId: number): Promise<void> {
+    async deleteTags(tx: Prisma.TransactionClient, postId: number): Promise<void> {
         const tagsKey = [REDIS_POSTS, postId, REDIS_TAGS].join(':');
         await this.redisClient.del(tagsKey);
-        return await this.postTagRepository.deleteRelationsByPostId(tx, postId);
+        await this.postTagRepository.deleteRelationsByPostId(tx, postId);
+        return;
     }
 }

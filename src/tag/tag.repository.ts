@@ -1,7 +1,7 @@
 import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
 import { PrismaService } from "@_/prisma/prisma.service";
 import { Injectable, Logger } from "@nestjs/common";
-import { Tag } from "@prisma/client";
+import { Prisma, Tag } from "@prisma/client";
 
 @Injectable()
 export class TagRepository {
@@ -24,7 +24,7 @@ export class TagRepository {
         }
     }
 
-    async getTagByName(tx: any, name: string): Promise<Tag> {
+    async getTagByName(tx: Prisma.TransactionClient, name: string): Promise<Tag> {
         const where = {
             name,
             deletedAt: null,
@@ -37,7 +37,7 @@ export class TagRepository {
         }
     }
 
-    async createTagByName(tx: any, name: string): Promise<Tag> {
+    async createTagByName(tx: Prisma.TransactionClient, name: string): Promise<Tag> {
         try {
             return await tx.tag.create({ data: { name }});
         } catch(err) {

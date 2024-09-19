@@ -17,10 +17,11 @@ export class ViewScheduleService {
 
     @Cron(CronExpression.EVERY_MINUTE)
     async processViewEvents(): Promise<void> {
-        this.logger.log('조회수 스케쥴 시작');
+        const now = Date.now();
         try {
             const allKeys = [REDIS_POSTS, REDIS_ALL, REDIS_VIEWS, REDIS_LOG].join(':');
             const viewsLogKeys = await this.redisClient.keys(allKeys);
+            let count = 0;
 
             for (const viewsLogKey of viewsLogKeys) {
                 const postId = Number(viewsLogKey.split(':')[1]);
@@ -39,9 +40,12 @@ export class ViewScheduleService {
                     });
                 }
 
-                await this.viewRepository.createViews(viewsLogs);
+                const createdResult = await this.viewRepository.createViews(viewsLogs);
+                count += createdResult.count;
                 return;
             }
+            this.logger.log(`조회수 스케쥴 작업 성공: ${count}개 ${Date.now() - now}ms`);
+            return;
         } catch(err) {
             this.logger.error(err);
             throw new RepositoryBadGatewayException(err.message);

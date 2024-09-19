@@ -15,33 +15,33 @@ export class ViewService {
     ) {}
 
     async getViewCountByPostId(postId: number): Promise<number> {
-        const viewsCountKey = [REDIS_POSTS, postId, REDIS_VIEWS, REDIS_COUNT].join(':');
+        const viewCountKey = [REDIS_POSTS, postId, REDIS_VIEWS, REDIS_COUNT].join(':');
 
-        const redisViewsCount = await this.redisClient.get(viewsCountKey);
+        const redisViewsCount = await this.redisClient.get(viewCountKey);
         if (redisViewsCount) {
             return Number(redisViewsCount);
         }
 
-        const foundViewsCount = await this.viewRepository.getViewCountByPostId(postId);
-        await this.redisClient.set(viewsCountKey, String(foundViewsCount), 'EX', ONE_HOUR_BY_SECOND);
-        return foundViewsCount;
+        const foundViewCount = await this.viewRepository.getViewCountByPostId(postId);
+        await this.redisClient.set(viewCountKey, String(foundViewCount), 'EX', ONE_HOUR_BY_SECOND);
+        return foundViewCount;
     }
  
     async createView({ postId, userId }: ICreateViewInput): Promise<void> {
-        const viewsCountKey = [REDIS_POSTS, postId, REDIS_VIEWS, REDIS_COUNT].join(':');
+        const viewCountKey = [REDIS_POSTS, postId, REDIS_VIEWS, REDIS_COUNT].join(':');
         const viewsLogKey = [REDIS_POSTS, postId, REDIS_VIEWS, REDIS_LOG].join(':');
 
-        const redisViewsCount = await this.redisClient.get(viewsCountKey);
-        if (!redisViewsCount) {
+        const redisViewCount = await this.redisClient.get(viewCountKey);
+        if (!redisViewCount) {
             const dbViewsCount = await this.viewRepository.getViewCountByPostId(postId);
-            await this.redisClient.set(viewsCountKey, dbViewsCount, 'EX', ONE_HOUR_BY_SECOND);
+            await this.redisClient.set(viewCountKey, dbViewsCount, 'EX', ONE_HOUR_BY_SECOND);
         }
         const viewLog = {
             userId,
             createdAt: new Date(),
         };
         await this.redisClient.rpush(viewsLogKey, JSON.stringify(viewLog));
-        await this.redisClient.incr(viewsCountKey);
+        await this.redisClient.incr(viewCountKey);
 
         return;
     }

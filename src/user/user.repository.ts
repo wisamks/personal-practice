@@ -69,10 +69,10 @@ export class UserRepository {
         }
     }
     
-    async createUser(data: Prisma.UserCreateInput): Promise<Pick<User, 'id'>> {
+    async createUser(data: Prisma.UserCreateInput): Promise<User> {
         try {
-            const createdResult = await this.prismaService.user.create({ data });
-            return { id: createdResult.id };
+            const createdUser = await this.prismaService.user.create({ data });
+            return createdUser;
         } catch(err) {
             this.logger.error(err);
             throw new RepositoryBadGatewayException(err.meesage);
@@ -82,16 +82,17 @@ export class UserRepository {
     async updateUser({ updateUserReqDto, userId }: {
         updateUserReqDto: Prisma.UserUpdateInput;
         userId: number;
-    }) {
+    }): Promise<Prisma.BatchPayload> {
         const where = {
             id: userId,
             deletedAt: null,
         }
         try {
-            await this.prismaService.user.update({
+            const updatedResult = await this.prismaService.user.updateMany({
                 data: updateUserReqDto,
                 where,
             });
+            return updatedResult;
         } catch(err) {
             this.logger.error(err);
             throw new RepositoryBadGatewayException(err.meesage);
@@ -134,18 +135,19 @@ export class UserRepository {
         }
     }
     
-    async deleteUser(userId: number) {
+    async deleteUser(userId: number): Promise<Prisma.BatchPayload> {
         const where = {
             id: userId,
             deletedAt: null,
         };
         try {
-            await this.prismaService.user.update({
+            const deletedResult = await this.prismaService.user.updateMany({
                 data: {
                     deletedAt: new Date(),
                 },
                 where,
             });
+            return deletedResult;
         } catch(err) {
             this.logger.error(err);
             throw new RepositoryBadGatewayException(err.meesage);
