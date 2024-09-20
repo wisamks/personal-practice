@@ -37,6 +37,9 @@ export class UserService {
 
     async getRefreshToken(userId: number): Promise<string> {
         const foundUser = await this.userRepository.findUserById(userId);
+        if (!foundUser) {
+            throw new UserNotFoundException();
+        }
         return foundUser.refreshToken;
     }
 
@@ -80,7 +83,7 @@ export class UserService {
     }
 
     async deleteUser(userId: number): Promise<void> {
-        const deletedResult = await this.userRepository.deleteUser(userId);
+        const deletedResult = await this.userRepository.deleteUser({ userId, now: new Date() });
         if (deletedResult.count) {
             return;
         }

@@ -135,7 +135,10 @@ export class UserRepository {
         }
     }
     
-    async deleteUser(userId: number): Promise<Prisma.BatchPayload> {
+    async deleteUser({ userId, now }: {
+        userId: number;
+        now: Date;
+    }): Promise<Prisma.BatchPayload> {
         const where = {
             id: userId,
             deletedAt: null,
@@ -143,7 +146,7 @@ export class UserRepository {
         try {
             const deletedResult = await this.prismaService.user.updateMany({
                 data: {
-                    deletedAt: new Date(),
+                    deletedAt: now,
                 },
                 where,
             });

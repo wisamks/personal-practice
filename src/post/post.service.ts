@@ -137,7 +137,7 @@ export class PostService {
         ]);
         
         // 조회 수 올리기
-        await this.viewService.createView({ postId, userId })
+        await this.viewService.createView({ postId, userId, createdAt: new Date() })
 
         // 각 정보들 객체로 저장
         const responseDto = {
