@@ -11,13 +11,28 @@ export class TagRepository {
         private readonly prismaService: PrismaService,
     ) {}
 
+    async findTags(tagIds: number[]): Promise<Tag[]> {
+        const where = {
+            id: {
+                in: tagIds,
+            },
+            deletedAt: null,
+        };
+        try {
+            return await this.prismaService.tag.findMany({ where });
+        } catch(err) {
+            this.logger.error(err);
+            throw new RepositoryBadGatewayException(err.message);
+        }
+    }
+
     async findTag(id: number): Promise<Tag> {
         const where = {
             id,
             deletedAt: null,
         };
         try {
-            return this.prismaService.tag.findUnique({ where });
+            return await this.prismaService.tag.findUnique({ where });
         } catch(err) {
             this.logger.error(err);
             throw new RepositoryBadGatewayException(err.message);

@@ -2,6 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { ViewScheduleService } from "../view-schedule.service";
 import { ViewRepository } from "../view.repository";
 import { Redis } from "ioredis";
+import { ICreateViewInput } from "../types/create-view.input.interface";
 
 describe('ViewScheduleService', () => {
     const mockViewRepository: jest.Mocked<Partial<ViewRepository>> = {
@@ -51,7 +52,7 @@ describe('ViewScheduleService', () => {
 
     describe('processViewEvents, 입력: 없음, 동작: 1분마다 조회 로그를 레디스에서 뽑아서 db로 반영', () => {
         it('반환: undefined, 조건: 조회 로그 성공적으로 db에 저장', async () => {
-            const newLog = {
+            const newLog: ICreateViewInput = {
                 postId: 20,
                 userId: viewLog.userId,
                 createdAt: viewLog.createdAt,
@@ -67,11 +68,7 @@ describe('ViewScheduleService', () => {
             expect(redisClient.lpop).toHaveBeenCalledWith<[string]>(viewsLogKeys[0]);
             expect(redisClient.lpop).toHaveBeenCalledTimes(3);
             expect(redisClient.del).toHaveBeenCalledWith<[string]>(viewsLogKeys[0]);
-            expect(repository.createViews).toHaveBeenCalledWith<[{
-                postId: number,
-                userId: number,
-                createdAt: Date,
-            }[]]>([newLog, newLog]);
+            expect(repository.createViews).toHaveBeenCalledWith<[ICreateViewInput[]]>([newLog, newLog]);
         });
     });
 });

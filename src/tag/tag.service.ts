@@ -25,13 +25,12 @@ export class TagService {
         }
 
         const foundRelations = await this.postTagRepository.findRelationsByPostId(postId);
-        const foundTags = [];
-        for (const relation of foundRelations) {
-            const foundTag = await this.tagRepository.findTag(relation.tagId);
-            foundTags.push(foundTag.name);
-        }
-        await this.redisClient.set(tagsKey, JSON.stringify(foundTags), 'EX', ONE_HOUR_BY_SECOND);
-        return foundTags;
+        const foundTagIds = foundRelations.map(relation => relation.tagId);
+        const foundTags = await this.tagRepository.findTags(foundTagIds)
+        const foundTagNames = foundTags.map(tag => tag.name);
+        
+        await this.redisClient.set(tagsKey, JSON.stringify(foundTagNames), 'EX', ONE_HOUR_BY_SECOND);
+        return foundTagNames;
     }
 
     async createTags(tx: Prisma.TransactionClient, { tags, postId }: {

@@ -12,10 +12,15 @@ export class PostTagRepository {
     ) {}
 
     async findRelationsByPostId(postId: number): Promise<PostTag[]> {
-        const foundRelations = await this.prismaService.postTag.findMany({
-            where: { postId }
-        });
-        return foundRelations;
+        try {
+            const foundRelations = await this.prismaService.postTag.findMany({
+                where: { postId }
+            });
+            return foundRelations;
+        } catch(err) {
+            this.logger.error(err);
+            throw new RepositoryBadGatewayException(err.message);
+        }
     }
 
     async createRelations(tx: Prisma.TransactionClient, data: PostTag[]): Promise<Prisma.BatchPayload> {
