@@ -83,7 +83,7 @@ export class UserService {
     }
 
     async deleteUser(userId: number): Promise<void> {
-        const deletedResult = await this.userRepository.deleteUser({ userId, now: new Date() });
+        const deletedResult = await this.userRepository.deleteUser(userId);
         if (deletedResult.count) {
             return;
         }

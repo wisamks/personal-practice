@@ -72,6 +72,7 @@ describe('ViewRepository', () => {
             };
             const createdLog: View = {
                 ...data,
+                createdAt: now,
                 updatedAt: now,
                 deletedAt: null,
                 id: 1,
@@ -90,6 +91,7 @@ describe('ViewRepository', () => {
             };
             const createdLog: View = {
                 ...data,
+                createdAt: now,
                 updatedAt: now,
                 deletedAt: null,
                 id: 1,

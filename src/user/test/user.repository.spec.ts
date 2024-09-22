@@ -34,6 +34,7 @@ describe('UserRepository', () => {
 
     afterEach(() => {
         jest.clearAllMocks();
+        jest.useRealTimers();
     });
 
     const now = new Date();
@@ -323,8 +324,9 @@ describe('UserRepository', () => {
                 deletedAt: now,
             };
             mockPrismaService.user.updateMany.mockResolvedValue(deletedResult);
+            jest.useFakeTimers().setSystemTime(now);
 
-            await expect(repository.deleteUser({ userId, now })).resolves.toEqual<Prisma.BatchPayload>(deletedResult);
+            await expect(repository.deleteUser(userId)).resolves.toEqual<Prisma.BatchPayload>(deletedResult);
             expect(mockPrismaService.user.updateMany).toHaveBeenCalledWith<[Prisma.UserUpdateManyArgs]>({ where, data });
         });
 
@@ -337,9 +339,10 @@ describe('UserRepository', () => {
             const data: Prisma.UserUpdateInput = {
                 deletedAt: now,
             };
+            jest.useFakeTimers().setSystemTime(now);
             mockPrismaService.user.updateMany.mockRejectedValue(new Error());
 
-            await expect(repository.deleteUser({ userId, now })).rejects.toThrow(RepositoryBadGatewayException);
+            await expect(repository.deleteUser(userId)).rejects.toThrow(RepositoryBadGatewayException);
             expect(mockPrismaService.user.updateMany).toHaveBeenCalledWith<[Prisma.UserUpdateManyArgs]>({ where, data });
         });
     });

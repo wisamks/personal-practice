@@ -2,7 +2,6 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { UserRepository } from "../user.repository";
 import { UserService } from "../user.service";
 import { User } from "@prisma/client";
-import { PrismaService } from "@_/prisma/prisma.service";
 import { plainToInstance } from "class-transformer";
 import { GetUserResDto } from "../dto/response/get-user.res.dto";
 import { UserConflictEmailException, UserNotFoundException } from "@_/common/custom-error.util";
@@ -10,7 +9,6 @@ import { IProviderOptions } from "../types/provider-options.interface";
 import * as bcrypt from 'bcryptjs';
 import { CreateUserReqDto } from "../dto/request/create-user.req.dto";
 import { UpdateUserReqDto } from "../dto/request/update-user.req.dto";
-import { HttpException } from "@nestjs/common";
 
 describe('UserService', () => {
   let service: UserService;
@@ -258,7 +256,7 @@ describe('UserService', () => {
       repository.deleteUser.mockResolvedValue({ count: 1 });
 
       await expect(service.deleteUser(userId)).resolves.toEqual<void>(undefined);
-      expect(repository.deleteUser).toHaveBeenCalled();
+      expect(repository.deleteUser).toHaveBeenCalledWith<[number]>(userId);
     });
 
     it('반환: NotFoundError, 조건: 유저 아이디로 db에서 찾지 못했다면', async () => {
@@ -267,7 +265,7 @@ describe('UserService', () => {
       repository.findUserById.mockResolvedValue(null);
 
       await expect(service.deleteUser(userId)).rejects.toThrow(UserNotFoundException);
-      expect(repository.deleteUser).toHaveBeenCalled();
+      expect(repository.deleteUser).toHaveBeenCalledWith<[number]>(userId);
       expect(repository.findUserById).toHaveBeenCalledWith<[number]>(userId);
     });
   });

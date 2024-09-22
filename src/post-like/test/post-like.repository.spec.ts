@@ -36,6 +36,7 @@ describe('PostLikeRepository', () => {
 
     afterEach(() => {
         jest.clearAllMocks();
+        jest.useRealTimers();
     });
 
     const now = new Date();
@@ -200,9 +201,10 @@ describe('PostLikeRepository', () => {
                 deletedAt: now,
             };
             mockPrismaService.postLike.update.mockResolvedValue(deletedLike);
+            jest.useFakeTimers().setSystemTime(now);
 
             await expect(repository.deletePostLike(id)).resolves.toEqual<void>(undefined);
-            expect(mockPrismaService.postLike.update).toHaveBeenCalled();
+            expect(mockPrismaService.postLike.update).toHaveBeenCalledWith<[Prisma.PostLikeUpdateArgs]>({ where, data });
         });
 
         it('반환: BadGateWayError, 조건: db 통신 에러', async () => {
@@ -212,12 +214,13 @@ describe('PostLikeRepository', () => {
                 deletedAt: null,
             };
             const data: Prisma.PostLikeUpdateInput = {
-                deletedAt: null,
+                deletedAt: now,
             };
             mockPrismaService.postLike.update.mockRejectedValue(new Error());
+            jest.useFakeTimers().setSystemTime(now);
 
             await expect(repository.deletePostLike(id)).rejects.toThrow(RepositoryBadGatewayException);
-            expect(mockPrismaService.postLike.update).toHaveBeenCalled();
+            expect(mockPrismaService.postLike.update).toHaveBeenCalledWith<[Prisma.PostLikeUpdateArgs]>({ where, data });
         });
     });
 
@@ -236,9 +239,10 @@ describe('PostLikeRepository', () => {
                 deletedAt: now,
             };
             mockPrismaService.postLike.updateMany.mockResolvedValue(deletedResult);
+            jest.useFakeTimers().setSystemTime(now);
 
             await expect(repository.deletePostLikes({ postId, userIds })).resolves.toEqual<Prisma.BatchPayload>(deletedResult);
-            expect(mockPrismaService.postLike.updateMany).toHaveBeenCalled();
+            expect(mockPrismaService.postLike.updateMany).toHaveBeenCalledWith<[Prisma.PostLikeUpdateManyArgs]>({ where, data });
         });
 
         it('반환: BadGateWayError, 조건: db 통신 에러', async () => {
@@ -254,9 +258,10 @@ describe('PostLikeRepository', () => {
                 deletedAt: now,
             };
             mockPrismaService.postLike.updateMany.mockRejectedValue(new Error());
+            jest.useFakeTimers().setSystemTime(now);
 
             await expect(repository.deletePostLikes({ postId, userIds })).rejects.toThrow(RepositoryBadGatewayException);
-            expect(mockPrismaService.postLike.updateMany).toHaveBeenCalled();
+            expect(mockPrismaService.postLike.updateMany).toHaveBeenCalledWith<[Prisma.PostLikeUpdateManyArgs]>({ where, data });
         });
     });
 });

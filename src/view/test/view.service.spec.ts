@@ -44,6 +44,7 @@ describe('ViewService', () => {
 
     afterAll(() => {
         jest.clearAllMocks();
+        jest.useRealTimers();
     });
 
     const now = new Date();
@@ -82,6 +83,7 @@ describe('ViewService', () => {
         it('반환: undefined, 조건: 조회 수 레디스에 등록 안 된 상태', async () => {
             redisClient.get.mockResolvedValue(null);
             repository.findViewCountByPostId.mockResolvedValue(viewCount);
+            jest.useFakeTimers().setSystemTime(now);
 
             await expect(service.createView({ userId, postId, createdAt: now })).resolves.toEqual<void>(undefined);
             expect(redisClient.get).toHaveBeenCalledWith(viewCountKey);
@@ -93,6 +95,7 @@ describe('ViewService', () => {
 
         it('반환: undefined, 조건: 조회 수 레디스에 등록 된 상태', async () => {
             redisClient.get.mockResolvedValue(String(viewCount));
+            jest.useFakeTimers().setSystemTime(now);
 
             await expect(service.createView({ userId, postId, createdAt: now })).resolves.toEqual<void>(undefined);
             expect(redisClient.get).toHaveBeenCalledWith(viewCountKey);
