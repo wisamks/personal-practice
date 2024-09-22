@@ -101,6 +101,7 @@ export class CommentService {
         const updatedResult = await this.commentRepository.updateComment({
             data: updateCommentReqDto,
             commentId,
+            userId,
         });
 
         if (updatedResult.count) {
@@ -127,7 +128,7 @@ export class CommentService {
             cursor: commentId,
             take: COMMENT_DELETE_TAKE,
         });
-        const deletedResult = await this.commentRepository.deleteComment(commentId);
+        const deletedResult = await this.commentRepository.deleteComment({ commentId, userId });
         if (deletedResult.count) {
             // 레디스
             const commentsKey = [REDIS_POSTS, postId, REDIS_COMMENTS, REDIS_DEFAULT_PAGE].join(':');

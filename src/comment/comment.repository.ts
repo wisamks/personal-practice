@@ -4,6 +4,7 @@ import { Comment, Prisma } from "@prisma/client";
 import { ICreateCommentInput } from "./types/create-comment.input.interface";
 import { IGetCommentsInput } from "./types/get-comments.input.interface";
 import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
+import { IDeleteCommentInput } from "./types/delete-comment.input.interface";
 
 @Injectable()
 export class CommentRepository {
@@ -77,12 +78,14 @@ export class CommentRepository {
         }
     }
 
-    async updateComment({data, commentId}: {
+    async updateComment({data, commentId, userId}: {
         data: Prisma.CommentUpdateInput;
         commentId: number;
+        userId: number;
     }): Promise<Prisma.BatchPayload> {
         const where = {
             id: commentId,
+            authorId: userId,
             deletedAt: null,
         };
         try {
@@ -97,9 +100,10 @@ export class CommentRepository {
         }
     }
 
-    async deleteComment(commentId: number): Promise<Prisma.BatchPayload> {
+    async deleteComment({ commentId, userId }: IDeleteCommentInput): Promise<Prisma.BatchPayload> {
         const where = {
             id: commentId,
+            authorId: userId,
             deletedAt: null,
         };
         const data = {
