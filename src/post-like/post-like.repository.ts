@@ -19,7 +19,7 @@ export class PostLikeRepository {
             deletedAt: null,
         };
         try {
-            return this.prismaService.postLike.findMany({ where });
+            return await this.prismaService.postLike.findMany({ where });
         } catch(err) {
             this.logger.error(err);
             throw new RepositoryBadGatewayException(err.message);
@@ -64,8 +64,8 @@ export class PostLikeRepository {
 
     async createPostLikes(data: ITogglePostLikeReq[]): Promise<Prisma.BatchPayload> {
         try {
-            const createdCount = await this.prismaService.postLike.createMany({ data });
-            return createdCount;
+            const createdResult = await this.prismaService.postLike.createMany({ data });
+            return createdResult;
         } catch(err) {
             this.logger.error(err);
             throw new RepositoryBadGatewayException(err.message);

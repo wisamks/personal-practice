@@ -69,9 +69,10 @@ export class TagService {
         postId: number;
     }): Promise<void> {
         await this.deleteTags(tx, postId);
-        if (tags) {
-            await this.createTags(tx, { tags, postId });
+        if (!tags || tags.length === 0) {
+            return;
         }
+        await this.createTags(tx, { tags, postId });
         return;
     }
 

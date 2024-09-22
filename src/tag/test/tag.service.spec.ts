@@ -135,6 +135,28 @@ describe('TagService', () => {
         });
     });
 
+    describe('updateTags, 입력: 트랜잭션 객체 & 태그명 배열 & 게시글 아이디, 동작: 태그 삭제 작업 후 생성 작업', () => {
+        it('반환: undefined, 조건: 태그가 있을 때, 동작: 태그 삭제 후 생성 로직 진행', async () => {
+            const tags = [mockTag1.name, mockTag2.name];
+            jest.spyOn(service, 'deleteTags').mockResolvedValue(undefined);
+            jest.spyOn(service, 'createTags').mockResolvedValue(undefined);
+
+            await expect(service.updateTags(tx, { tags, postId })).resolves.toEqual<void>(undefined);
+            expect(service.deleteTags).toHaveBeenCalledWith<[Prisma.TransactionClient, number]>(tx, postId);
+            expect(service.createTags).toHaveBeenCalledWith<[Prisma.TransactionClient, { tags: string[], postId: number }]>(tx, { tags, postId });
+        });
+
+        it('반환: undefined, 조건: 태그가 없을 때, 동작: 태그 삭제만 진행', async () => {
+            const tags = [];
+            jest.spyOn(service, 'deleteTags').mockResolvedValue(undefined);
+            jest.spyOn(service, 'createTags');
+
+            await expect(service.updateTags(tx, { tags, postId })).resolves.toEqual<void>(undefined);
+            expect(service.deleteTags).toHaveBeenCalledWith<[Prisma.TransactionClient, number]>(tx, postId);
+            expect(service.createTags).not.toHaveBeenCalled();
+        });
+    });
+
     describe('deleteTags, 입력: 트랜잭션 객체 & 게시글 아이디, 동작: 태그 관계 전부 삭제 및 레디스 키 삭제', () => {
         it('반환: undefined, 조건: 항상, 동작: 단일 게시글의 모든 태그 삭제 및 레디스 키 삭제', async () => {
             await expect(service.deleteTags(tx, postId)).resolves.toEqual<void>(undefined);
