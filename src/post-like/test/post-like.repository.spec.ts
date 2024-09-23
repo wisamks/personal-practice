@@ -4,6 +4,7 @@ import { PrismaService } from "@_/prisma/prisma.service";
 import { PostLike, Prisma } from "@prisma/client";
 import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
 import { ITogglePostLikeReq } from "../types/toggle-post-like.req.interface";
+import * as current from "@_/common/generate-datetime.util";
 
 describe('PostLikeRepository', () => {
     const mockPrismaService = {
@@ -39,7 +40,7 @@ describe('PostLikeRepository', () => {
         jest.useRealTimers();
     });
 
-    const now = new Date();
+    const now = current.generateDatetime();
     const mockPostLike1: PostLike = {
         id: 1,
         createdAt: now,
@@ -201,7 +202,7 @@ describe('PostLikeRepository', () => {
                 deletedAt: now,
             };
             mockPrismaService.postLike.update.mockResolvedValue(deletedLike);
-            jest.useFakeTimers().setSystemTime(now);
+            jest.spyOn(current, 'generateDatetime').mockReturnValue(now);
 
             await expect(repository.deletePostLike(id)).resolves.toEqual<void>(undefined);
             expect(mockPrismaService.postLike.update).toHaveBeenCalledWith<[Prisma.PostLikeUpdateArgs]>({ where, data });
@@ -217,7 +218,7 @@ describe('PostLikeRepository', () => {
                 deletedAt: now,
             };
             mockPrismaService.postLike.update.mockRejectedValue(new Error());
-            jest.useFakeTimers().setSystemTime(now);
+            jest.spyOn(current, 'generateDatetime').mockReturnValue(now);
 
             await expect(repository.deletePostLike(id)).rejects.toThrow(RepositoryBadGatewayException);
             expect(mockPrismaService.postLike.update).toHaveBeenCalledWith<[Prisma.PostLikeUpdateArgs]>({ where, data });
@@ -239,7 +240,7 @@ describe('PostLikeRepository', () => {
                 deletedAt: now,
             };
             mockPrismaService.postLike.updateMany.mockResolvedValue(deletedResult);
-            jest.useFakeTimers().setSystemTime(now);
+            jest.spyOn(current, 'generateDatetime').mockReturnValue(now);
 
             await expect(repository.deletePostLikes({ postId, userIds })).resolves.toEqual<Prisma.BatchPayload>(deletedResult);
             expect(mockPrismaService.postLike.updateMany).toHaveBeenCalledWith<[Prisma.PostLikeUpdateManyArgs]>({ where, data });
@@ -258,7 +259,7 @@ describe('PostLikeRepository', () => {
                 deletedAt: now,
             };
             mockPrismaService.postLike.updateMany.mockRejectedValue(new Error());
-            jest.useFakeTimers().setSystemTime(now);
+            jest.spyOn(current, 'generateDatetime').mockReturnValue(now);
 
             await expect(repository.deletePostLikes({ postId, userIds })).rejects.toThrow(RepositoryBadGatewayException);
             expect(mockPrismaService.postLike.updateMany).toHaveBeenCalledWith<[Prisma.PostLikeUpdateManyArgs]>({ where, data });

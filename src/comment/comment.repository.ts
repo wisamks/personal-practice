@@ -5,6 +5,7 @@ import { ICreateCommentInput } from "./types/create-comment.input.interface";
 import { IGetCommentsInput } from "./types/get-comments.input.interface";
 import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
 import { IDeleteCommentInput } from "./types/delete-comment.input.interface";
+import { generateDatetime } from "@_/common/generate-datetime.util";
 
 @Injectable()
 export class CommentRepository {
@@ -107,7 +108,7 @@ export class CommentRepository {
             deletedAt: null,
         };
         const data = {
-            deletedAt: new Date(),
+            deletedAt: generateDatetime(),
         }
         try {
             const deletedResult = await this.prismaService.comment.updateMany({

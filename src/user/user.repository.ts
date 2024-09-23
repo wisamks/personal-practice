@@ -3,6 +3,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { Prisma, User } from "@prisma/client";
 import { IProviderOptions } from "./types/provider-options.interface";
 import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
+import { generateDatetime } from "@_/common/generate-datetime.util";
 
 @Injectable()
 export class UserRepository {
@@ -143,7 +144,7 @@ export class UserRepository {
         try {
             const deletedResult = await this.prismaService.user.updateMany({
                 data: {
-                    deletedAt: new Date(),
+                    deletedAt: generateDatetime(),
                 },
                 where,
             });

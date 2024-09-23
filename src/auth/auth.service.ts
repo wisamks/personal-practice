@@ -15,12 +15,14 @@ import { ONE_WEEK_BY_SECOND, REDIS_REFRESH_TOKEN, REDIS_USERS } from "@_/redis/c
 import { IOauthUserOutput } from "./types/oauth-user.output.interface";
 import { AuthBadRequestException, AuthJwtException } from "@_/common/custom-error.util";
 import { AUTH_LOG_MESSAGE } from "./constants/auth.constants";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class AuthService {
     private readonly logger = new Logger(AuthService.name);
 
     constructor(
+        private readonly configService: ConfigService,
         private readonly userService: UserService,
         private readonly userRepository: UserRepository,
         private readonly jwtService: JwtService,
@@ -99,8 +101,8 @@ export class AuthService {
 
     private async getTokens(payload: ISignInOutput): Promise<SignInResDto> {
         const refreshOptions = {
-            secret: process.env.JWT_REFRESH_TOKEN_SECRET,
-            expiresIn: process.env.JWT_REFRESH_EXPIRE,
+            secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+            expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRE'),
         };
         
         const [accessToken, refreshToken] = await Promise.all([

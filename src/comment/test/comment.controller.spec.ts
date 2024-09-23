@@ -8,6 +8,7 @@ import { GetCommentsReqDto } from "../dto/request/get-comments.req.dto";
 import { CreateCommentResDto } from "../dto/response/create-comment.res.dto";
 import { CreateCommentReqDto } from "../dto/request/create-comment.req.dto";
 import { UpdateCommentReqDto } from "../dto/request/update-comment.req.dto";
+import { generateDatetime } from "@_/common/generate-datetime.util";
 
 describe('CommentController', () => {
     const mockCommentService: jest.Mocked<Partial<CommentService>> = {
@@ -39,7 +40,7 @@ describe('CommentController', () => {
         jest.clearAllMocks();
     });
 
-    const now = new Date();
+    const now = generateDatetime();
     const postId = 20;
     const commentId = 1;
     const userId = 1;

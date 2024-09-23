@@ -14,6 +14,7 @@ import { ICreateCommentInput } from "../types/create-comment.input.interface";
 import { UpdateCommentReqDto } from "../dto/request/update-comment.req.dto";
 import { CommentForbiddenException, CommentNotFoundException, RepositoryBadGatewayException } from "@_/common/custom-error.util";
 import { IDeleteCommentInput } from "../types/delete-comment.input.interface";
+import { generateDatetime } from "@_/common/generate-datetime.util";
 
 describe('CommentService', () => {
     const mockCommentRepository: jest.Mocked<Partial<CommentRepository>> = {
@@ -61,7 +62,7 @@ describe('CommentService', () => {
         jest.clearAllMocks();
     });
 
-    const now = new Date();
+    const now = generateDatetime();
     const postId = 20;
     const commentId = 1;
     const userId = 1;

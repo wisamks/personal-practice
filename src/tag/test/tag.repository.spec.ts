@@ -3,6 +3,7 @@ import { TagRepository } from "../tag.repository";
 import { PrismaService } from "@_/prisma/prisma.service";
 import { Prisma, Tag } from "@prisma/client";
 import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
+import { generateDatetime } from "@_/common/generate-datetime.util";
 
 describe('TagRepository', () => {
     const mockPrismaService = {
@@ -39,7 +40,7 @@ describe('TagRepository', () => {
         jest.clearAllMocks();
     });
 
-    const now = new Date();
+    const now = generateDatetime();
     const mockTag1: Tag = {
         id: 1,
         createdAt: now,

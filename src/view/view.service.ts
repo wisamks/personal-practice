@@ -3,6 +3,7 @@ import { ViewRepository } from "./view.repository";
 import { ICreateViewInput } from "./types/create-view.input.interface";
 import { Redis } from "ioredis";
 import { ONE_HOUR_BY_SECOND, REDIS_COUNT, REDIS_LOG, REDIS_POSTS, REDIS_VIEWS } from "@_/redis/constants/redis.constant";
+import { generateDatetime } from "@_/common/generate-datetime.util";
 
 @Injectable()
 export class ViewService {
@@ -38,7 +39,7 @@ export class ViewService {
         }
         const viewLog = {
             userId,
-            createdAt: new Date(),
+            createdAt: generateDatetime(),
         };
         await this.redisClient.rpush(viewsLogKey, JSON.stringify(viewLog));
         await this.redisClient.incr(viewCountKey);

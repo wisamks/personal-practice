@@ -7,6 +7,7 @@ import { plainToInstance } from "class-transformer";
 import { CreateUserReqDto } from "../dto/request/create-user.req.dto";
 import { CreateUserResDto } from "../dto/response/create-user.res.dto";
 import { UpdateUserReqDto } from "../dto/request/update-user.req.dto";
+import { generateDatetime } from "@_/common/generate-datetime.util";
 
 describe('UserController', () => {
     const mockUserService: jest.Mocked<Omit<UserService, 'logger' | 'userRepository'>> = {
@@ -21,12 +22,13 @@ describe('UserController', () => {
         deleteRefresh: jest.fn(),
     };
 
+    const now = generateDatetime();
     const mockUser1: User = {
         id: 1,
         email: 'mock1@mock.com',
         name: '몰랑이',
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: now,
+        updatedAt: now,
         deletedAt: null,
         password: '1234',
         provider: 'google',
@@ -38,8 +40,8 @@ describe('UserController', () => {
         id: 2,
         email: 'mock2@mock.com',
         name: '몰랑잉',
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: now,
+        updatedAt: now,
         deletedAt: null,
         password: '1234',
         provider: 'naver',

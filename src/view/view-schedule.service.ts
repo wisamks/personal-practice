@@ -4,6 +4,7 @@ import { Redis } from "ioredis";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { REDIS_ALL, REDIS_LOG, REDIS_POSTS, REDIS_VIEWS } from "@_/redis/constants/redis.constant";
 import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
+import { generateDatetime } from "@_/common/generate-datetime.util";
 
 @Injectable()
 export class ViewScheduleService {
@@ -36,7 +37,7 @@ export class ViewScheduleService {
                     viewsLogs.push({
                         postId,
                         userId: Number(userId),
-                        createdAt: new Date(createdAt),
+                        createdAt: generateDatetime(createdAt),
                     });
                 }
             }

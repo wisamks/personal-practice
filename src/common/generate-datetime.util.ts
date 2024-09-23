@@ -1,0 +1,1 @@
+export const generateDatetime = (date?: Date) => new Date(date || null);

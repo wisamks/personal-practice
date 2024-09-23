@@ -3,6 +3,7 @@ import { ViewScheduleService } from "../view-schedule.service";
 import { ViewRepository } from "../view.repository";
 import { Redis } from "ioredis";
 import { ICreateViewInput } from "../types/create-view.input.interface";
+import { generateDatetime } from "@_/common/generate-datetime.util";
 
 describe('ViewScheduleService', () => {
     const mockViewRepository: jest.Mocked<Partial<ViewRepository>> = {
@@ -47,7 +48,7 @@ describe('ViewScheduleService', () => {
     const viewsLogKeys = ['posts:20:views:log'];
     const viewLog = {
         userId: 1,
-        createdAt: new Date(),
+        createdAt: generateDatetime(),
     };
 
     describe('processViewEvents, 입력: 없음, 동작: 1분마다 조회 로그를 레디스에서 뽑아서 db로 반영', () => {

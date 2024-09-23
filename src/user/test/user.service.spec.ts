@@ -9,6 +9,7 @@ import { IProviderOptions } from "../types/provider-options.interface";
 import * as bcrypt from 'bcryptjs';
 import { CreateUserReqDto } from "../dto/request/create-user.req.dto";
 import { UpdateUserReqDto } from "../dto/request/update-user.req.dto";
+import { generateDatetime } from "@_/common/generate-datetime.util";
 
 describe('UserService', () => {
   let service: UserService;
@@ -26,12 +27,12 @@ describe('UserService', () => {
     updateUserDeleteRefresh: jest.fn(),
   };
 
-  const now = new Date();
+  const now = generateDatetime();
   
   const mockUser1: User = {
     id: 1,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: now,
+    updatedAt: now,
     deletedAt: null,
     email: 'mock1@mock.com',
     password: '1234',
@@ -43,8 +44,8 @@ describe('UserService', () => {
 
   const mockUser2: User = {
     id: 2,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: now,
+    updatedAt: now,
     deletedAt: null,
     email: 'mock2@mock.com',
     password: '1234',

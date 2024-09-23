@@ -4,6 +4,7 @@ import { ITogglePostLikeReq } from "./types/toggle-post-like.req.interface";
 import { PostLike, Prisma } from "@prisma/client";
 import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
 import { IDeletePostLikeReq } from "./types/delete-post-like.req.interface";
+import { generateDatetime } from "@_/common/generate-datetime.util";
 
 @Injectable()
 export class PostLikeRepository {
@@ -78,7 +79,7 @@ export class PostLikeRepository {
             deletedAt: null,
         };
         const data = {
-            deletedAt: new Date(),
+            deletedAt: generateDatetime(),
         };
         try {
             await this.prismaService.postLike.update({
@@ -100,7 +101,7 @@ export class PostLikeRepository {
             deletedAt: null,
         };
         const data = {
-            deletedAt: new Date(),
+            deletedAt: generateDatetime(),
         };
         try {
             const deletedResult = await this.prismaService.postLike.updateMany({

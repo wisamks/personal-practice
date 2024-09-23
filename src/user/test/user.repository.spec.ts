@@ -4,6 +4,7 @@ import { UserRepository } from "../user.repository";
 import { Prisma, User } from "@prisma/client";
 import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
 import { IProviderOptions } from "../types/provider-options.interface";
+import * as current from "@_/common/generate-datetime.util";
 
 describe('UserRepository', () => {
     const mockPrismaService = {
@@ -34,10 +35,9 @@ describe('UserRepository', () => {
 
     afterEach(() => {
         jest.clearAllMocks();
-        jest.useRealTimers();
     });
 
-    const now = new Date();
+    const now = current.generateDatetime();
     const mockUser1: User = {
         id: 1,
         createdAt: now,
@@ -324,7 +324,7 @@ describe('UserRepository', () => {
                 deletedAt: now,
             };
             mockPrismaService.user.updateMany.mockResolvedValue(deletedResult);
-            jest.useFakeTimers().setSystemTime(now);
+            jest.spyOn(current, 'generateDatetime').mockReturnValue(now);
 
             await expect(repository.deleteUser(userId)).resolves.toEqual<Prisma.BatchPayload>(deletedResult);
             expect(mockPrismaService.user.updateMany).toHaveBeenCalledWith<[Prisma.UserUpdateManyArgs]>({ where, data });
@@ -339,7 +339,7 @@ describe('UserRepository', () => {
             const data: Prisma.UserUpdateInput = {
                 deletedAt: now,
             };
-            jest.useFakeTimers().setSystemTime(now);
+            jest.spyOn(current, 'generateDatetime').mockReturnValue(now);
             mockPrismaService.user.updateMany.mockRejectedValue(new Error());
 
             await expect(repository.deleteUser(userId)).rejects.toThrow(RepositoryBadGatewayException);

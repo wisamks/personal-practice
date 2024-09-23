@@ -4,6 +4,7 @@ import { PrismaService } from "@_/prisma/prisma.service";
 import { Comment, Prisma } from "@prisma/client";
 import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
 import { ICreateCommentInput } from "../types/create-comment.input.interface";
+import * as current from "@_/common/generate-datetime.util";
 
 describe('CommentRepository', () => {
     const mockPrismaService = {
@@ -35,13 +36,12 @@ describe('CommentRepository', () => {
 
     afterEach(() => {
         jest.clearAllMocks();
-        jest.useRealTimers();
     });
 
     const postId = 20;
     const userId = 1;
     const commentId = 1;
-    const now = new Date();
+    const now = current.generateDatetime();
     const mockComment1: Comment = {
         id: 1,
         createdAt: now,
@@ -228,7 +228,7 @@ describe('CommentRepository', () => {
                 deletedAt: now,
             };
             mockPrismaService.comment.updateMany.mockResolvedValue(deletedResult);
-            jest.useFakeTimers().setSystemTime(now);
+            jest.spyOn(current, 'generateDatetime').mockReturnValue(now);
 
             await expect(repository.deleteComment({ commentId, userId })).resolves.toEqual<Prisma.BatchPayload>(deletedResult);
             expect(mockPrismaService.comment.updateMany).toHaveBeenCalledWith<[Prisma.CommentUpdateManyArgs]>({ where, data });
@@ -244,7 +244,7 @@ describe('CommentRepository', () => {
                 deletedAt: now,
             };
             mockPrismaService.comment.updateMany.mockRejectedValue(new Error());
-            jest.useFakeTimers().setSystemTime(now);
+            jest.spyOn(current, 'generateDatetime').mockReturnValue(now);
 
             await expect(repository.deleteComment({ commentId, userId })).rejects.toThrow(RepositoryBadGatewayException);
             expect(mockPrismaService.comment.updateMany).toHaveBeenCalledWith<[Prisma.CommentUpdateManyArgs]>({ where, data });

@@ -4,6 +4,7 @@ import { ViewRepository } from "../view.repository";
 import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
 import { Prisma, View } from "@prisma/client";
 import { ICreateViewInput } from "../types/create-view.input.interface";
+import { generateDatetime } from "@_/common/generate-datetime.util";
 
 describe('ViewRepository', () => {
     const mockPrismaService = {
@@ -36,7 +37,7 @@ describe('ViewRepository', () => {
 
     const postId = 20;
     const userId = 1;
-    const now = new Date();
+    const now = generateDatetime();
     const viewCount = 200;
 
     describe('findViewCountByPostId, 입력: 단일 게시글 아이디 숫자, 동작: 단일 게시글의 조회 수를 db에서 찾아 반환', () => {

@@ -5,6 +5,7 @@ import { PostTagRepository } from "../post-tag.repository";
 import { Redis } from "ioredis";
 import { PostTag, Prisma, Tag } from "@prisma/client";
 import { ONE_HOUR_BY_SECOND } from "@_/redis/constants/redis.constant";
+import { generateDatetime } from "@_/common/generate-datetime.util";
 
 describe('TagService', () => {
     const mockTagRepository: jest.Mocked<Partial<TagRepository>> = {
@@ -62,7 +63,7 @@ describe('TagService', () => {
         jest.clearAllMocks();
     });
 
-    const now = new Date();
+    const now = generateDatetime();
     const mockTag1: Tag = {
         id: 1,
         createdAt: now,
