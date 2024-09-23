@@ -8,6 +8,7 @@ import { GetCursorReqDto } from "./dto/request/get-cursor.req.dto";
 import { RepositoryBadGatewayException } from "@_/common/custom-error.util";
 import { IDeletePostQuery } from "./types/delete-post.query.interface";
 import { IDbPost } from "./types/db-post.interface";
+import { generateDatetime } from "@_/common/generate-datetime.util";
 
 @Injectable()
 export class PostRepository {
@@ -21,6 +22,8 @@ export class PostRepository {
         const where = {
             deletedAt: null,
         };
+        const skip = cursor ? 1 : 0;
+        const optionalCursor = cursor && {cursor: { id: cursor }};
         try {
             return await this.prismaService.post.findMany({
                 where,
@@ -31,8 +34,8 @@ export class PostRepository {
                     author: true,
                 },
                 take,
-                skip: cursor ? 1 : 0,
-                ...(cursor && {cursor: { id: cursor }})
+                skip,
+                ...optionalCursor
             });
         } catch(err) {
             this.logger.error(err);
@@ -48,7 +51,7 @@ export class PostRepository {
             return await this.prismaService.post.findMany({
                 where,
                 orderBy: {
-                    createdAt: 'desc'
+                    id: 'desc'
                 },
                 skip: (skip - 1) * take,
                 take,
@@ -68,7 +71,7 @@ export class PostRepository {
             deletedAt: null,
         };
         try {
-            return await this.prismaService.post.findFirst({
+            return await this.prismaService.post.findUnique({
                 where,
                 include: {
                     author: true,
@@ -132,7 +135,7 @@ export class PostRepository {
         try {
             const deletedResult = await tx.post.updateMany({
                 data: {
-                    deletedAt: new Date(),
+                    deletedAt: generateDatetime(),
                 },
                 where,
             });

@@ -168,8 +168,7 @@ export class PostService {
 
             // 레디스 write through
             const postKey = [REDIS_POSTS, createdPost.id].join(':');
-            const foundPost = await this.postRepository.findPost(createdPost.id);
-            await this.redisClient.set(postKey, JSON.stringify(foundPost), 'EX', ONE_HOUR_BY_SECOND);
+            await this.redisClient.set(postKey, JSON.stringify(createdPost), 'EX', ONE_HOUR_BY_SECOND);
             
             return plainToInstance(CreatePostResDto, createdPost);
         });
