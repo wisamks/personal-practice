@@ -84,7 +84,9 @@ export class AuthService {
     }
 
     async signOut(userId: number): Promise<void> {
-        await this.userService.deleteRefresh(userId);
+        const refreshKey = [REDIS_USERS, userId, REDIS_REFRESH_TOKEN].join(':');
+        // await this.userService.deleteRefresh(userId);
+        await this.redisClient.del(refreshKey);
         this.logger.log(AUTH_LOG_MESSAGE.LOGOUT + userId);
         return;
     }
