@@ -7,6 +7,6 @@ import { PostLikeScheduleService } from './post-like-schedule.service';
 @Module({
   controllers: [PostLikeController],
   providers: [PostLikeService, PostLikeRepository, PostLikeScheduleService],
-  exports: [PostLikeService, PostLikeRepository, PostLikeScheduleService]
+  exports: [PostLikeService, PostLikeRepository, PostLikeScheduleService],
 })
 export class PostLikeModule {}

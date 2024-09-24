@@ -1,4 +1,18 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, ParseIntPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Logger,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostReqDto } from './dto/request/create-post.req.dto';
 import { ReqUser } from '@_/user/decorators/req-user.decorator';
@@ -18,17 +32,13 @@ export class PostController {
 
   @Get(PATH_POST.CURSOR)
   @HttpCode(HttpStatus.OK)
-  async getPostsByCursor(
-    @Query() getCursorReqDto: GetCursorReqDto,
-  ): Promise<GetPostResDto[]> {
+  async getPostsByCursor(@Query() getCursorReqDto: GetCursorReqDto): Promise<GetPostResDto[]> {
     return this.postService.getPostsByCursor(getCursorReqDto);
   }
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  async getPosts(
-    @Query() getPostsReqDto: GetPostsReqDto,
-  ): Promise<GetPostResDto[]> {
+  async getPosts(@Query() getPostsReqDto: GetPostsReqDto): Promise<GetPostResDto[]> {
     return await this.postService.getPosts(getPostsReqDto);
   }
 
@@ -60,16 +70,17 @@ export class PostController {
     @Param('postId', ParseIntPipe) postId: number,
     @ReqUser('userId') userId: number,
   ): Promise<void> {
-    return await this.postService.updatePost({ updatePostReqDto, postId, userId });
+    return await this.postService.updatePost({
+      updatePostReqDto,
+      postId,
+      userId,
+    });
   }
 
   @Delete(PATH_POST.POST_ID)
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
-  async deletePost(
-    @Param('postId', ParseIntPipe) postId: number,
-    @ReqUser('userId') userId: number,
-  ): Promise<void> {
+  async deletePost(@Param('postId', ParseIntPipe) postId: number, @ReqUser('userId') userId: number): Promise<void> {
     return await this.postService.deletePost({ postId, userId });
   }
 }

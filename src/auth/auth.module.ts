@@ -11,6 +11,8 @@ import { RefreshStrategy } from './strategies/refresh.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { NaverStrategy } from './strategies/naver.strategy';
 import { KakaoStrategy } from './strategies/kakao.strategy';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { DebugInterceptor } from './interceptors/sign-in-log.interceptor';
 
 @Module({
   imports: [
@@ -31,6 +33,6 @@ import { KakaoStrategy } from './strategies/kakao.strategy';
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, RefreshStrategy, GoogleStrategy, NaverStrategy, KakaoStrategy],
-  exports: [PassportModule, JwtStrategy]
+  exports: [PassportModule, JwtStrategy],
 })
 export class AuthModule {}

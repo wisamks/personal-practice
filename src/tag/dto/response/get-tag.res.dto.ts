@@ -1,11 +1,11 @@
-import { Exclude, Expose } from "class-transformer";
+import { Exclude, Expose } from 'class-transformer';
 
 export class GetTagResDto {
-    @Expose({ name: 'id' })
-    readonly tagId: number
+  @Expose({ name: 'id' })
+  readonly tagId: number;
 
-    readonly name: string;
+  readonly name: string;
 
-    @Exclude()
-    readonly postId: number;
+  @Exclude()
+  readonly postId: number;
 }

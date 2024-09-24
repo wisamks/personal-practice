@@ -25,11 +25,9 @@ import { LoggerModule } from './logger/logger.module';
     PostLikeModule,
     PrismaModule,
     RedisModule,
-    LoggerModule
+    LoggerModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-  ],
+  providers: [AppService],
 })
 export class AppModule {}

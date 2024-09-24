@@ -1,6 +1,6 @@
-import { ProviderType } from "@_/auth/types/oauth-user.output.interface";
+import { ProviderType } from '@_/auth/types/oauth-user.output.interface';
 
 export interface IProviderOptions {
-    readonly provider: ProviderType,
-    readonly providerId: string,
+  readonly provider: ProviderType;
+  readonly providerId: string;
 }

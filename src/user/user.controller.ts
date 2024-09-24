@@ -1,4 +1,17 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Logger,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserReqDto } from './dto/request/update-user.req.dto';
 import { CreateUserResDto } from './dto/response/create-user.res.dto';
@@ -22,17 +35,13 @@ export class UserController {
 
   @Get(PATH_USER.USER_ID)
   @HttpCode(HttpStatus.OK)
-  async getUser(
-    @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<GetUserResDto> {
+  async getUser(@Param('userId', ParseIntPipe) userId: number): Promise<GetUserResDto> {
     return await this.userService.getUser(userId);
   }
 
   @Post(PATH_USER.SIGN_UP)
   @HttpCode(HttpStatus.CREATED)
-  async createUser(
-    @Body() createUserReqDto: CreateUserReqDto,
-  ): Promise<CreateUserResDto> {
+  async createUser(@Body() createUserReqDto: CreateUserReqDto): Promise<CreateUserResDto> {
     return await this.userService.createUser(createUserReqDto);
   }
 
@@ -49,9 +58,7 @@ export class UserController {
   @Delete()
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
-  async deleteUser(
-    @ReqUser('userId', ParseIntPipe) userId: number,
-  ): Promise<void> {
+  async deleteUser(@ReqUser('userId', ParseIntPipe) userId: number): Promise<void> {
     return await this.userService.deleteUser(userId);
   }
 }

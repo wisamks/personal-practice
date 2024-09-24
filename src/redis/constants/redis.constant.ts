@@ -12,7 +12,7 @@ export const REDIS_OLD = 'old';
 export const REDIS_NEW = 'new';
 
 export const REDIS_USERS = 'users';
-export const REDIS_REFRESH_TOKEN = 'refresh'
+export const REDIS_REFRESH_TOKEN = 'refresh';
 
 export const REDIS_DEFAULT_ZERO = 0;
 

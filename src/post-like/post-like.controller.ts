@@ -6,7 +6,7 @@ import { PATH_ROUTES } from '@_/common/constants/common.constant';
 
 @Controller(PATH_ROUTES.POST_LIKE)
 export class PostLikeController {
-  private readonly logger = new Logger(PostLikeController.name)
+  private readonly logger = new Logger(PostLikeController.name);
 
   constructor(private readonly postLikeService: PostLikeService) {}
 
@@ -19,5 +19,4 @@ export class PostLikeController {
   ): Promise<void> {
     return await this.postLikeService.togglePostLike({ postId, userId });
   }
-
 }

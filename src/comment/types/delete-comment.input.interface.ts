@@ -1,4 +1,4 @@
 export interface IDeleteCommentInput {
-    userId: number;
-    commentId: number;
+  userId: number;
+  commentId: number;
 }

@@ -8,17 +8,9 @@ import { ViewModule } from '@_/view/view.module';
 import { PostLikeModule } from '@_/post-like/post-like.module';
 
 @Module({
-  imports: [
-    TagModule,
-    CommentModule,
-    ViewModule,
-    PostLikeModule,
-  ],
+  imports: [TagModule, CommentModule, ViewModule, PostLikeModule],
   controllers: [PostController],
-  providers: [
-    PostService, 
-    PostRepository, 
-  ],
-  exports: [PostService, PostRepository]
+  providers: [PostService, PostRepository],
+  exports: [PostService, PostRepository],
 })
 export class PostModule {}

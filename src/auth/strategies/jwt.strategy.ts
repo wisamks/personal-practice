@@ -1,26 +1,26 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { PassportStrategy } from "@nestjs/passport";
-import { ExtractJwt, Strategy } from "passport-jwt";
-import { Request } from "express";
-import { ConfigService } from "@nestjs/config";
+import { Injectable, Logger } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Request } from 'express';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-    private readonly logger = new Logger(JwtStrategy.name);
+  private readonly logger = new Logger(JwtStrategy.name);
 
-    constructor(
-        private readonly configService: ConfigService,
-    ) {
-        super({
-            secretOrKey: configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
-            jwtFromRequest: ExtractJwt.fromExtractors([(req: Request) => {
-                const { accessToken } = req.cookies;
-                return accessToken ? accessToken : null;
-            }])
-        })
-    }
+  constructor(private readonly configService: ConfigService) {
+    super({
+      secretOrKey: configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (req: Request) => {
+          const { accessToken } = req.cookies;
+          return accessToken ? accessToken : null;
+        },
+      ]),
+    });
+  }
 
-    async validate(payload: any) {
-        return { userId: payload.userId };
-    }
+  async validate(payload: any) {
+    return { userId: payload.userId };
+  }
 }

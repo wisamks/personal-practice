@@ -1,5 +1,5 @@
-import { PostTag, Tag } from "@prisma/client";
+import { PostTag, Tag } from '@prisma/client';
 
 export interface IDbTag extends PostTag {
-    readonly tag?: Tag;
+  readonly tag?: Tag;
 }

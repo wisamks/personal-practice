@@ -1,4 +1,4 @@
 export interface IDeletePostQuery {
-    postId: number;
-    userId: number;
+  postId: number;
+  userId: number;
 }

@@ -1,3 +1,3 @@
 export interface ISignInOutput {
-    userId: number;
+  userId: number;
 }

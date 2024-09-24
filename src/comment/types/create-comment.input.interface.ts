@@ -1,5 +1,5 @@
 export interface ICreateCommentInput {
-    content: string;
-    authorId: number;
-    postId: number;
+  content: string;
+  authorId: number;
+  postId: number;
 }

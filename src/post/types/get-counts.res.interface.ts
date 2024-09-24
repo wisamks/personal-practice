@@ -1,5 +1,5 @@
 export interface IGetCountsRes {
-    readonly viewsCount: number;
-    readonly commentsCount: number;
-    readonly likesCount: number;
+  readonly viewsCount: number;
+  readonly commentsCount: number;
+  readonly likesCount: number;
 }

@@ -1,15 +1,15 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { UserRepository } from "../user.repository";
-import { UserService } from "../user.service";
-import { User } from "@prisma/client";
-import { plainToInstance } from "class-transformer";
-import { GetUserResDto } from "../dto/response/get-user.res.dto";
-import { UserConflictEmailException, UserNotFoundException } from "@_/common/custom-error.util";
-import { IProviderOptions } from "../types/provider-options.interface";
+import { Test, TestingModule } from '@nestjs/testing';
+import { UserRepository } from '../user.repository';
+import { UserService } from '../user.service';
+import { User } from '@prisma/client';
+import { plainToInstance } from 'class-transformer';
+import { GetUserResDto } from '../dto/response/get-user.res.dto';
+import { UserConflictEmailException, UserNotFoundException } from '@_/common/custom-error.util';
+import { IProviderOptions } from '../types/provider-options.interface';
 import * as bcrypt from 'bcryptjs';
-import { CreateUserReqDto } from "../dto/request/create-user.req.dto";
-import { UpdateUserReqDto } from "../dto/request/update-user.req.dto";
-import { generateDatetime } from "@_/common/generate-datetime.util";
+import { CreateUserReqDto } from '../dto/request/create-user.req.dto';
+import { UpdateUserReqDto } from '../dto/request/update-user.req.dto';
+import { generateDatetime } from '@_/common/generate-datetime.util';
 
 describe('UserService', () => {
   let service: UserService;
@@ -28,7 +28,7 @@ describe('UserService', () => {
   };
 
   const now = generateDatetime();
-  
+
   const mockUser1: User = {
     id: 1,
     createdAt: now,
@@ -82,7 +82,7 @@ describe('UserService', () => {
 
       await expect(service.getUsers()).resolves.toEqual<GetUserResDto[]>(output);
       expect(repository.findUsers).toHaveBeenCalledWith<[void]>();
-    })
+    });
   });
 
   describe('getUser, 입력: 유저 아이디, 동작: 단일 유저 반환', () => {
@@ -102,8 +102,8 @@ describe('UserService', () => {
 
       await expect(service.getUser(userId)).rejects.toThrow(UserNotFoundException);
       expect(repository.findUserById).toHaveBeenCalledWith<[number]>(userId);
-    })
-  })
+    });
+  });
 
   describe('getUserOauth, 입력: Oauth provider 옵션, 동작: Oauth 정보에 맞는 단일 유저 반환', () => {
     it('반환: 단일 유저 객체, 조건: db에 Oauth provider 옵션과 일치하는 유저가 있을 때', async () => {
@@ -117,7 +117,7 @@ describe('UserService', () => {
 
       await expect(service.getUserOauth(providerOptions)).resolves.toEqual<GetUserResDto>(output);
       expect(repository.findUserByProviderOptions).toHaveBeenCalledWith<[IProviderOptions]>(providerOptions);
-    })
+    });
 
     it('반환: null, 조건: db에 Oauth provider 옵션과 일치하는 유저가 없을 때', async () => {
       const user = null;
@@ -127,7 +127,7 @@ describe('UserService', () => {
         providerId: '1029385618932',
       };
       repository.findUserByProviderOptions.mockResolvedValue(null);
-      
+
       expect(await service.getUserOauth(providerOptions)).toEqual<GetUserResDto>(output);
       expect(repository.findUserByProviderOptions).toHaveBeenCalledWith<[IProviderOptions]>(providerOptions);
     });
@@ -148,7 +148,7 @@ describe('UserService', () => {
       const user = mockUser2;
       repository.findUserById.mockResolvedValue(user);
 
-      await expect(service.getRefreshToken(userId)).resolves.toEqual<string|null>(user.refreshToken);
+      await expect(service.getRefreshToken(userId)).resolves.toEqual<string | null>(user.refreshToken);
       expect(repository.findUserById).toHaveBeenCalledWith<[number]>(userId);
     });
 
@@ -161,14 +161,14 @@ describe('UserService', () => {
       expect(repository.findUserById).toHaveBeenCalledWith<[number]>(userId);
     });
   });
-  
+
   describe('createUser, 입력: 유저 생성 dto, 동작: 단일 유저 생성', () => {
     it('반환: 단일 유저 아이디 객체, 조건: 생성했다면', async () => {
       const hashedPassword = await bcrypt.hash(mockUser1.password, 10);
       jest.spyOn(bcrypt, 'hash').mockResolvedValue(hashedPassword as never);
       const user = {
         ...mockUser1,
-        password: hashedPassword
+        password: hashedPassword,
       };
       const createUserReqDto: CreateUserReqDto = {
         email: 'mock1@mock.com',
@@ -189,7 +189,7 @@ describe('UserService', () => {
         password: hashedPassword,
       });
     });
-    
+
     it('반환: ConflictError, 조건: 해당 이메일로 찾았을 때 이미 db에 있다면', async () => {
       const hashedPassword = await bcrypt.hash(mockUser1.password, 10);
       const user = {
@@ -223,7 +223,10 @@ describe('UserService', () => {
       repository.updateUser.mockResolvedValue({ count: 1 });
 
       await expect(service.updateUser({ updateUserReqDto, userId })).resolves.toEqual<void>(undefined);
-      expect(repository.updateUser).toHaveBeenCalledWith<[{updateUserReqDto: UpdateUserReqDto, userId: number}]>({ updateUserReqDto, userId });
+      expect(repository.updateUser).toHaveBeenCalledWith<[{ updateUserReqDto: UpdateUserReqDto; userId: number }]>({
+        updateUserReqDto,
+        userId,
+      });
     });
 
     it('반환: ConflictError, 조건: 수정하려는 이메일로 db에서 다른 유저를 찾았다면', async () => {
@@ -246,7 +249,10 @@ describe('UserService', () => {
       repository.findUserById.mockResolvedValue(null);
 
       await expect(service.updateUser({ updateUserReqDto, userId })).rejects.toThrow(UserNotFoundException);
-      expect(repository.updateUser).toHaveBeenCalledWith<[{ updateUserReqDto: UpdateUserReqDto, userId: number }]>({ updateUserReqDto, userId });
+      expect(repository.updateUser).toHaveBeenCalledWith<[{ updateUserReqDto: UpdateUserReqDto; userId: number }]>({
+        updateUserReqDto,
+        userId,
+      });
       expect(repository.findUserById).toHaveBeenCalledWith<[number]>(userId);
     });
   });
@@ -278,7 +284,10 @@ describe('UserService', () => {
       repository.updateUserCreateRefresh.mockResolvedValue({ count: 1 });
 
       await expect(service.createRefresh({ userId, refreshToken })).resolves.toEqual<void>(undefined);
-      expect(repository.updateUserCreateRefresh).toHaveBeenCalledWith<[{ userId: number, refreshToken: string }]>({ userId, refreshToken });
+      expect(repository.updateUserCreateRefresh).toHaveBeenCalledWith<[{ userId: number; refreshToken: string }]>({
+        userId,
+        refreshToken,
+      });
     });
 
     it('반환: NotFoundError, 조건: 유저를 찾지 못했다면', async () => {
@@ -288,7 +297,10 @@ describe('UserService', () => {
       repository.findUserById.mockResolvedValue(null);
 
       await expect(service.createRefresh({ userId, refreshToken })).rejects.toThrow(UserNotFoundException);
-      expect(repository.updateUserCreateRefresh).toHaveBeenCalledWith<[{ userId: number, refreshToken: string }]>({ userId, refreshToken });
+      expect(repository.updateUserCreateRefresh).toHaveBeenCalledWith<[{ userId: number; refreshToken: string }]>({
+        userId,
+        refreshToken,
+      });
       expect(repository.findUserById).toHaveBeenCalledWith<[number]>(userId);
     });
   });
@@ -300,7 +312,7 @@ describe('UserService', () => {
 
       await expect(service.deleteRefresh(userId)).resolves.toEqual<void>(undefined);
       expect(repository.updateUserDeleteRefresh).toHaveBeenCalledWith<[number]>(userId);
-    })
+    });
 
     it('반환: NotFoundError, 조건: 유저를 찾지 못했다면', async () => {
       const userId = 99;
@@ -312,4 +324,4 @@ describe('UserService', () => {
       expect(repository.findUserById).toHaveBeenCalledWith<[number]>(userId);
     });
   });
-})
+});

@@ -1,4 +1,18 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, ParseIntPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Logger,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CreateCommentReqDto } from './dto/request/create-comment.req.dto';
 import { JwtAuthGuard } from '@_/auth/guards/jwt-auth.guard';
@@ -21,7 +35,10 @@ export class CommentController {
     @Query() getCommentsReqDto: GetCommentsReqDto,
     @Param('postId', ParseIntPipe) postId: number,
   ): Promise<GetCommentResDto[]> {
-    return await this.commentService.getCommentsByPostId({ getCommentsReqDto, postId });
+    return await this.commentService.getCommentsByPostId({
+      getCommentsReqDto,
+      postId,
+    });
   }
 
   @Post()
@@ -32,9 +49,13 @@ export class CommentController {
     @Param('postId') postId: number,
     @ReqUser('userId') userId: number,
   ): Promise<CreateCommentResDto> {
-    return await this.commentService.createComment({ createCommentReqDto, postId, userId });
+    return await this.commentService.createComment({
+      createCommentReqDto,
+      postId,
+      userId,
+    });
   }
-  
+
   @Put(PATH_COMMENT.COMMENT_ID)
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
@@ -42,9 +63,14 @@ export class CommentController {
     @Body() updateCommentReqDto: UpdateCommentReqDto,
     @Param('postId', ParseIntPipe) postId: number,
     @Param('commentId', ParseIntPipe) commentId: number,
-    @ReqUser('userId') userId: number, 
+    @ReqUser('userId') userId: number,
   ): Promise<void> {
-    return await this.commentService.updateComment({ updateCommentReqDto, postId, commentId, userId });
+    return await this.commentService.updateComment({
+      updateCommentReqDto,
+      postId,
+      commentId,
+      userId,
+    });
   }
 
   @Delete(PATH_COMMENT.COMMENT_ID)
@@ -53,8 +79,12 @@ export class CommentController {
   async deleteComment(
     @Param('commentId', ParseIntPipe) commentId: number,
     @Param('postId', ParseIntPipe) postId: number,
-    @ReqUser('userId') userId: number, 
+    @ReqUser('userId') userId: number,
   ): Promise<GetCommentResDto> {
-    return await this.commentService.deleteComment({ commentId, postId, userId });
+    return await this.commentService.deleteComment({
+      commentId,
+      postId,
+      userId,
+    });
   }
 }

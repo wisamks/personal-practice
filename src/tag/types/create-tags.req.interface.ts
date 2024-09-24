@@ -1,4 +1,4 @@
 export interface ICreateTagsReq {
-    name: string;
-    postId: number;
+  name: string;
+  postId: number;
 }
