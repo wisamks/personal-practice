@@ -11,11 +11,13 @@ import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule } from './logger/logger.module';
+import awsConfig from './config/aws.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      load: [awsConfig],
     }),
     ScheduleModule.forRoot(),
     AuthModule,

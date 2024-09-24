@@ -2,14 +2,22 @@ import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/commo
 import { PrismaClient } from '@prisma/client';
 import { PRISMA_DESTROY_MESSAGE, PRISMA_INIT_MESSAGE } from './constants/prisma.constant';
 import { RepositoryServiceUnavailableException } from '@_/common/custom-error.util';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(PrismaService.name);
 
-  constructor() {
+  constructor(
+    private readonly configService: ConfigService,
+  ) {
     super({
       log: ['error'],
+      datasources: {
+        db: {
+          url: configService.get<string>('DATABASE_URL'),
+        },
+      }
     });
   }
 
