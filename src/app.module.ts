@@ -12,6 +12,9 @@ import { RedisModule } from './redis/redis.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule } from './logger/logger.module';
 import awsConfig from './config/aws.config';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { AllExceptionFilter } from './common/filters/all-exception.filter';
+import { DebugInterceptor } from './auth/interceptors/sign-in-log.interceptor';
 
 @Module({
   imports: [
@@ -30,6 +33,16 @@ import awsConfig from './config/aws.config';
     LoggerModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: DebugInterceptor,
+    },
+  ],
 })
 export class AppModule {}
