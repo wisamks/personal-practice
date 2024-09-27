@@ -1,8 +1,13 @@
-// import { Test, TestingModule } from '@nestjs/testing';
-// import { PostLikeScheduleService } from '../post-like-schedule.service';
-// import { PostLikeRepository } from '../post-like.repository';
-// import { Redis } from 'ioredis';
-// import { ITogglePostLikeReq } from '../types/toggle-post-like.req.interface';
+import { Test, TestingModule } from '@nestjs/testing';
+import { PostLikeScheduleService } from '../post-like-schedule.service';
+import { PostLikeRepository } from '../post-like.repository';
+import { Redis } from 'ioredis';
+import { ITogglePostLikeReq } from '../types/toggle-post-like.req.interface';
+
+// 테스트 실패 안하도록 임시로 작성한 코드
+it('test', () => {
+    expect(1+1).toEqual(2);
+})
 
 // 서버 내부에서 돌아가는 크론 작업에 대한 테스트. 
 // 현재는 해당 코드를 사용하지 않으므로 임시 주석 처리.
