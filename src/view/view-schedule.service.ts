@@ -16,40 +16,42 @@ export class ViewScheduleService {
     private readonly redisClient: Redis,
   ) {}
 
-  @Cron(CronExpression.EVERY_MINUTE)
-  async processViewEvents(): Promise<void> {
-    const now = Date.now();
-    try {
-      const allKeys = [REDIS_POSTS, REDIS_ALL, REDIS_VIEWS, REDIS_LOG].join(':');
-      const viewsLogKeys = await this.redisClient.keys(allKeys);
-      const viewsLogs = [];
-      let count = 0;
+  // 서버 외부에서 스케줄 처리 중. 
+  // 이 코드는 해당 시스템 유지 보수 시 가동할 대체 크론 코드.
+  // @Cron(CronExpression.EVERY_MINUTE)
+  // async processViewEvents(): Promise<void> {
+  //   const now = Date.now();
+  //   try {
+  //     const allKeys = [REDIS_POSTS, REDIS_ALL, REDIS_VIEWS, REDIS_LOG].join(':');
+  //     const viewsLogKeys = await this.redisClient.keys(allKeys);
+  //     const viewsLogs = [];
+  //     let count = 0;
 
-      for (const viewsLogKey of viewsLogKeys) {
-        const postId = Number(viewsLogKey.split(':')[1]);
-        while (true) {
-          const viewLog = await this.redisClient.lpop(viewsLogKey);
-          if (!viewLog) {
-            await this.redisClient.del(viewsLogKey);
-            break;
-          }
-          const { userId, createdAt } = JSON.parse(viewLog);
-          viewsLogs.push({
-            postId,
-            userId: Number(userId),
-            createdAt: generateDatetime(createdAt),
-          });
-        }
-      }
-      if (viewsLogs.length !== 0) {
-        const createdResult = await this.viewRepository.createViews(viewsLogs);
-        count += createdResult.count;
-      }
-      this.logger.log(`조회수 스케쥴 작업 성공: ${count}개 ${Date.now() - now}ms`);
-      return;
-    } catch (err) {
-      this.logger.error(err);
-      throw new RepositoryBadGatewayException(err.message);
-    }
-  }
+  //     for (const viewsLogKey of viewsLogKeys) {
+  //       const postId = Number(viewsLogKey.split(':')[1]);
+  //       while (true) {
+  //         const viewLog = await this.redisClient.lpop(viewsLogKey);
+  //         if (!viewLog) {
+  //           await this.redisClient.del(viewsLogKey);
+  //           break;
+  //         }
+  //         const { userId, createdAt } = JSON.parse(viewLog);
+  //         viewsLogs.push({
+  //           postId,
+  //           userId: Number(userId),
+  //           createdAt: generateDatetime(createdAt),
+  //         });
+  //       }
+  //     }
+  //     if (viewsLogs.length !== 0) {
+  //       const createdResult = await this.viewRepository.createViews(viewsLogs);
+  //       count += createdResult.count;
+  //     }
+  //     this.logger.log(`조회수 스케쥴 작업 성공: ${count}개 ${Date.now() - now}ms`);
+  //     return;
+  //   } catch (err) {
+  //     this.logger.error(err);
+  //     throw new RepositoryBadGatewayException(err.message);
+  //   }
+  // }
 }

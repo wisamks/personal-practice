@@ -11,10 +11,11 @@ import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule } from './logger/logger.module';
-import awsConfig from './config/aws.config';
+import awsConfig from './aws/config/aws.config';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { DebugInterceptor } from './auth/interceptors/sign-in-log.interceptor';
+import { AwsModule } from './aws/aws.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { DebugInterceptor } from './auth/interceptors/sign-in-log.interceptor';
     PrismaModule,
     RedisModule,
     LoggerModule,
+    AwsModule,
   ],
   controllers: [AppController],
   providers: [
