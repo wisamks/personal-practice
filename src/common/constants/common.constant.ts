@@ -14,6 +14,7 @@ export const PATH_ROUTES = {
   USER: '/users',
   COMMENT: PATH_POST_PREFIX + '/comments',
   POST_LIKE: PATH_POST_PREFIX + '/likes',
+  S3: '/s3'
 };
 
 export const PATH_AUTH = {
