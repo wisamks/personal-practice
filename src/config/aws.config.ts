@@ -21,7 +21,7 @@ const loadParamsFromSsm = async (path: string): Promise<string> => {
 }
 
 export default async (): Promise<any> => {
-    const stage = await loadParamsFromSsm('/Practice/practice/STAGE');
+    const stage = process.argv[2];
     const env = await loadParamsFromSsm(`/Practice/practice/${stage}/env`);
     return JSON.parse(env);
 }
