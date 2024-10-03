@@ -15,3 +15,5 @@
     - dto는 class-validator와 class-transformer를 사용하여 구현한다.
     - typescript를 사용한다.
     - jwt, 비밀번호를 사용하여 인증한다.
+
+임시: ci/cd 테스트 중
