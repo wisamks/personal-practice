@@ -1,0 +1,21 @@
+name: CD Pipeline
+
+on:
+  workflow_run:
+    workflows: ["Docker Image CI"]
+    types: 
+      - completed
+
+jobs:
+  pull-and-start-image:
+    runs-on: self-hosted
+
+    steps:
+    - name: pull-docker-image
+      run: docker pull wisamks/goodikjyelicepractice:latest
+
+    - name: remove-old-container
+      run: docker rm -f goodikjyelicepractice-container || true
+
+    - name: run-new-container
+      run: docker run -v ~/.aws:/root/.aws -d -p 8080:8080 --name goodikjyelicepractice-container wisamks/goodikjyelicepractice:latest
